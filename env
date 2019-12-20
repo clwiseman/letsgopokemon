@@ -1,0 +1,2 @@
+export LETSGO_PG_PORT=5555
+export DATABASE_URL="postgres://letsgo:password@localhost:5555"

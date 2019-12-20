@@ -1,0 +1,18 @@
+version: "3"
+
+volumes:
+  postgres-data: # holds *all* of the postgresql data
+
+services:
+  pg:
+    image: postgres:12.1-alpine
+    environment:
+      POSTGRES_PASSWORD: pokemon
+      POSTGRES_USER: letsgo
+      POSTGRES_DATABASE: letsgopokemon
+      PGDATA: /var/lib/postgresql/data/pgdata
+    volumes:
+      - "postgres-data:/var/lib/postgresql/data/pgdata:z"
+
+    ports:
+      - "${LETSGO_PG_PORT:-5555}:5432"
