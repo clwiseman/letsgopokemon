@@ -1,0 +1,57 @@
+type Generation {
+  # The unique id for generation, equivalent to its generation number
+  id: ID!
+  # The display name for the generation number
+  displayName: String!
+}
+
+type Pokemon {
+  # The unique id of the pokemon, equivalent to its pokedex number
+  id: ID!
+  # The name of the pokemon
+  name: String!
+  # A url of the pokemon's image
+  image: String!
+  # The generation the pokemon was created input
+  generation: Int!
+}
+
+type Query {
+  """
+  Look up all available generations.
+  """
+  generation(): Generation
+
+  """
+  Look up a pokemon by its `id` (pokedex number).
+  """
+  pokemon(input: ID!): Pokemon
+}
+
+input NewGameSession {
+  userId: ID!
+}
+
+input GameInvite {
+  sessionId: ID!
+  name: String!
+}
+
+
+
+type GameSession {
+  id: ID!
+  users: [User!]
+}
+
+type User {
+  id: ID!
+  name: String!
+}
+
+type Mutation {
+  createGame(input: NewGameSession!): GameSession!
+  joinGame(input: GameInvite!): GameSession!
+  startTurn(input: User!, GameSession!): Turn!
+  endTurn(input: Drawing!): Turn!
+}
