@@ -1,3 +1,6 @@
+"""
+Generation represents the pokemon generational period.
+"""
 type Generation {
   # The unique id for generation, equivalent to its generation number
   id: ID!
@@ -5,6 +8,9 @@ type Generation {
   displayName: String!
 }
 
+"""
+Pokemon represents the pokedex information for a pokemon.
+"""
 type Pokemon {
   # The unique id of the pokemon, equivalent to its pokedex number
   id: ID!
@@ -12,7 +18,7 @@ type Pokemon {
   name: String!
   # A url of the pokemon's image
   image: String!
-  # The generation the pokemon was created input
+  # The generation the pokemon was created in
   generation: Int!
 }
 
@@ -20,7 +26,7 @@ type Query {
   """
   Look up all available generations.
   """
-  generation(): Generation
+  generations: Generation
 
   """
   Look up a pokemon by its `id` (pokedex number).
@@ -28,30 +34,180 @@ type Query {
   pokemon(input: ID!): Pokemon
 }
 
+"""
+User represents a player in the game
+"""
+type User {
+  # The unique id of a user
+  id: ID!
+  # The display name for the user profile
+  name: String!
+}
+
+"""
+GameSession represents the session users can join to play the game together
+"""
+type GameSession {
+  # The unique id of a session
+  id: ID!
+  # An array of users in the session
+  users: [User!]
+}
+
+"""
+NewGameSession represents a new session created by a user
+"""
 input NewGameSession {
   userId: ID!
 }
 
+"""
+CreateGameInput represents the input to the createGame mutation
+"""
+input CreateGameInput {
+  # A new session created by a user
+  newGameSession: NewGameSession!
+}
+
+"""
+CreateGamePayload represents the output to the createGame mutation
+"""
+type CreateGamePayload {
+  # The new game session
+  gameSession: GameSession!
+}
+
+"""
+GameInvite represents the information needed to add a new player to a session
+"""
 input GameInvite {
+  # The id of the session to join
   sessionId: ID!
-  name: String!
+  # The display name for the user
+  userName: String!
 }
 
-
-
-type GameSession {
-  id: ID!
-  users: [User!]
+"""
+JoinGameInput represents the input to the joinGame mutation
+"""
+input JoinGameInput {
+  # The information a user needs to join a game
+  invite: GameInvite!
 }
 
-type User {
+"""
+JoinGamePayload represents the output to the joinGame mutation
+"""
+type JoinGamePayload {
+  # The updated game session including the newly joined user
+  session: GameSession!
+}
+
+"""
+GameRound is the collection of player turns that occurs at the same time
+"""
+type GameRound {
+  # A unique id for a round within a turn of a game session
   id: ID!
-  name: String!
+  # The id of the current game session 
+  sessionId: ID!
+}
+
+"""
+Drawing represents the drawing done by a user on the canvas
+"""
+type Drawing {
+  # The url captured from the canvas after a turn is ended
+  url: String!
+}
+
+"""
+A Turn represents the gameplay for a user within a round
+"""
+type Turn {
+  # The unique id of the turn
+  id: ID!
+  # The id of the user who's turn it is
+  userId: ID!
+  # The pokemon being drawn
+  pokemon: Pokemon!
+  # The drawing captured from the canvas after a turn is ended
+  drawing: Drawing
+  # The round the turn occurs within
+  roundId: ID!
+  # The session the turn occurs within
+  sessionId: ID!
+}
+
+"""
+StartTurnInput represents the information needed to start a turn
+"""
+input NewTurn {
+  # The id of the user who's turn it is
+  userId: ID!
+  # The id of the round the turn occurs within
+  roundId: ID!
+  # The id of the session the turn occurs within
+  sessionId: ID!
+}
+
+"""
+StartTurnInput represents the input to the startTurn mutation
+"""
+input StartTurnInput {
+  newTurn: NewTurn!
+}
+
+"""
+StartTurnPayload represents the output to the startTurn mutation
+"""
+type StartTurnPayload {
+  # The turn for a user within a round
+  turn: Turn!
+}
+
+"""
+NewDrawing represents the drawing done by a user on the canvas
+"""
+input NewDrawing {
+  # The drawing url captured from the canvas after a turn is ended
+  drawing: String!
+}
+
+"""
+EndTurnInput represents the input to the endTurn mutation
+"""
+input EndTurnInput {
+  # The drawing captured from the canvas after a turn is ended
+  newDrawing: NewDrawing!
+}
+
+"""
+EndTurnPayload represents the output to the endTurn mutation
+"""
+type EndTurnPayload {
+  # The turn for a user within a round, now including the drawing
+  turn: Turn!
 }
 
 type Mutation {
-  createGame(input: NewGameSession!): GameSession!
-  joinGame(input: GameInvite!): GameSession!
-  startTurn(input: User!, GameSession!): Turn!
-  endTurn(input: Drawing!): Turn!
+  """
+  Start a new game session as the host.
+  """
+  createGame(input: CreateGameInput!): CreateGamePayload!
+
+  """
+  Join a game as an additional player.
+  """
+  joinGame(input: JoinGameInput!): JoinGamePayload!
+
+  """
+  Begin a turn.
+  """
+  startTurn(input: StartTurnInput!): StartTurnPayload!
+
+  """
+  End a turn.
+  """
+  endTurn(input: EndTurnInput!): EndTurnPayload!
 }

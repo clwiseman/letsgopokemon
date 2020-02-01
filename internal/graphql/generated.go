@@ -8,7 +8,6 @@ import (
 	"errors"
 	"strconv"
 	"sync"
-	"sync/atomic"
 
 	"github.com/99designs/gqlgen/graphql"
 	"github.com/99designs/gqlgen/graphql/introspection"
@@ -42,19 +41,67 @@ type DirectiveRoot struct {
 }
 
 type ComplexityRoot struct {
+	CreateGamePayload struct {
+		GameSession func(childComplexity int) int
+	}
+
+	Drawing struct {
+		URL func(childComplexity int) int
+	}
+
+	EndTurnPayload struct {
+		Turn func(childComplexity int) int
+	}
+
+	GameRound struct {
+		ID        func(childComplexity int) int
+		SessionID func(childComplexity int) int
+	}
+
+	GameSession struct {
+		ID    func(childComplexity int) int
+		Users func(childComplexity int) int
+	}
+
+	Generation struct {
+		DisplayName func(childComplexity int) int
+		ID          func(childComplexity int) int
+	}
+
+	JoinGamePayload struct {
+		Session func(childComplexity int) int
+	}
+
 	Mutation struct {
-		CreateTodo func(childComplexity int, input NewTodo) int
+		CreateGame func(childComplexity int, input CreateGameInput) int
+		EndTurn    func(childComplexity int, input EndTurnInput) int
+		JoinGame   func(childComplexity int, input JoinGameInput) int
+		StartTurn  func(childComplexity int, input StartTurnInput) int
+	}
+
+	Pokemon struct {
+		Generation func(childComplexity int) int
+		ID         func(childComplexity int) int
+		Image      func(childComplexity int) int
+		Name       func(childComplexity int) int
 	}
 
 	Query struct {
-		Todos func(childComplexity int) int
+		Generations func(childComplexity int) int
+		Pokemon     func(childComplexity int, input string) int
 	}
 
-	Todo struct {
-		Done func(childComplexity int) int
-		ID   func(childComplexity int) int
-		Text func(childComplexity int) int
-		User func(childComplexity int) int
+	StartTurnPayload struct {
+		Turn func(childComplexity int) int
+	}
+
+	Turn struct {
+		Drawing   func(childComplexity int) int
+		ID        func(childComplexity int) int
+		Pokemon   func(childComplexity int) int
+		RoundID   func(childComplexity int) int
+		SessionID func(childComplexity int) int
+		UserID    func(childComplexity int) int
 	}
 
 	User struct {
@@ -64,10 +111,14 @@ type ComplexityRoot struct {
 }
 
 type MutationResolver interface {
-	CreateTodo(ctx context.Context, input NewTodo) (*Todo, error)
+	CreateGame(ctx context.Context, input CreateGameInput) (*CreateGamePayload, error)
+	JoinGame(ctx context.Context, input JoinGameInput) (*JoinGamePayload, error)
+	StartTurn(ctx context.Context, input StartTurnInput) (*StartTurnPayload, error)
+	EndTurn(ctx context.Context, input EndTurnInput) (*EndTurnPayload, error)
 }
 type QueryResolver interface {
-	Todos(ctx context.Context) ([]*Todo, error)
+	Generations(ctx context.Context) (*Generation, error)
+	Pokemon(ctx context.Context, input string) (*Pokemon, error)
 }
 
 type executableSchema struct {
@@ -85,52 +136,219 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 	_ = ec
 	switch typeName + "." + field {
 
-	case "Mutation.createTodo":
-		if e.complexity.Mutation.CreateTodo == nil {
+	case "CreateGamePayload.gameSession":
+		if e.complexity.CreateGamePayload.GameSession == nil {
 			break
 		}
 
-		args, err := ec.field_Mutation_createTodo_args(context.TODO(), rawArgs)
+		return e.complexity.CreateGamePayload.GameSession(childComplexity), true
+
+	case "Drawing.url":
+		if e.complexity.Drawing.URL == nil {
+			break
+		}
+
+		return e.complexity.Drawing.URL(childComplexity), true
+
+	case "EndTurnPayload.turn":
+		if e.complexity.EndTurnPayload.Turn == nil {
+			break
+		}
+
+		return e.complexity.EndTurnPayload.Turn(childComplexity), true
+
+	case "GameRound.id":
+		if e.complexity.GameRound.ID == nil {
+			break
+		}
+
+		return e.complexity.GameRound.ID(childComplexity), true
+
+	case "GameRound.sessionId":
+		if e.complexity.GameRound.SessionID == nil {
+			break
+		}
+
+		return e.complexity.GameRound.SessionID(childComplexity), true
+
+	case "GameSession.id":
+		if e.complexity.GameSession.ID == nil {
+			break
+		}
+
+		return e.complexity.GameSession.ID(childComplexity), true
+
+	case "GameSession.users":
+		if e.complexity.GameSession.Users == nil {
+			break
+		}
+
+		return e.complexity.GameSession.Users(childComplexity), true
+
+	case "Generation.displayName":
+		if e.complexity.Generation.DisplayName == nil {
+			break
+		}
+
+		return e.complexity.Generation.DisplayName(childComplexity), true
+
+	case "Generation.id":
+		if e.complexity.Generation.ID == nil {
+			break
+		}
+
+		return e.complexity.Generation.ID(childComplexity), true
+
+	case "JoinGamePayload.session":
+		if e.complexity.JoinGamePayload.Session == nil {
+			break
+		}
+
+		return e.complexity.JoinGamePayload.Session(childComplexity), true
+
+	case "Mutation.createGame":
+		if e.complexity.Mutation.CreateGame == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_createGame_args(context.TODO(), rawArgs)
 		if err != nil {
 			return 0, false
 		}
 
-		return e.complexity.Mutation.CreateTodo(childComplexity, args["input"].(NewTodo)), true
+		return e.complexity.Mutation.CreateGame(childComplexity, args["input"].(CreateGameInput)), true
 
-	case "Query.todos":
-		if e.complexity.Query.Todos == nil {
+	case "Mutation.endTurn":
+		if e.complexity.Mutation.EndTurn == nil {
 			break
 		}
 
-		return e.complexity.Query.Todos(childComplexity), true
+		args, err := ec.field_Mutation_endTurn_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
 
-	case "Todo.done":
-		if e.complexity.Todo.Done == nil {
+		return e.complexity.Mutation.EndTurn(childComplexity, args["input"].(EndTurnInput)), true
+
+	case "Mutation.joinGame":
+		if e.complexity.Mutation.JoinGame == nil {
 			break
 		}
 
-		return e.complexity.Todo.Done(childComplexity), true
+		args, err := ec.field_Mutation_joinGame_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
 
-	case "Todo.id":
-		if e.complexity.Todo.ID == nil {
+		return e.complexity.Mutation.JoinGame(childComplexity, args["input"].(JoinGameInput)), true
+
+	case "Mutation.startTurn":
+		if e.complexity.Mutation.StartTurn == nil {
 			break
 		}
 
-		return e.complexity.Todo.ID(childComplexity), true
+		args, err := ec.field_Mutation_startTurn_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
 
-	case "Todo.text":
-		if e.complexity.Todo.Text == nil {
+		return e.complexity.Mutation.StartTurn(childComplexity, args["input"].(StartTurnInput)), true
+
+	case "Pokemon.generation":
+		if e.complexity.Pokemon.Generation == nil {
 			break
 		}
 
-		return e.complexity.Todo.Text(childComplexity), true
+		return e.complexity.Pokemon.Generation(childComplexity), true
 
-	case "Todo.user":
-		if e.complexity.Todo.User == nil {
+	case "Pokemon.id":
+		if e.complexity.Pokemon.ID == nil {
 			break
 		}
 
-		return e.complexity.Todo.User(childComplexity), true
+		return e.complexity.Pokemon.ID(childComplexity), true
+
+	case "Pokemon.image":
+		if e.complexity.Pokemon.Image == nil {
+			break
+		}
+
+		return e.complexity.Pokemon.Image(childComplexity), true
+
+	case "Pokemon.name":
+		if e.complexity.Pokemon.Name == nil {
+			break
+		}
+
+		return e.complexity.Pokemon.Name(childComplexity), true
+
+	case "Query.generations":
+		if e.complexity.Query.Generations == nil {
+			break
+		}
+
+		return e.complexity.Query.Generations(childComplexity), true
+
+	case "Query.pokemon":
+		if e.complexity.Query.Pokemon == nil {
+			break
+		}
+
+		args, err := ec.field_Query_pokemon_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Query.Pokemon(childComplexity, args["input"].(string)), true
+
+	case "StartTurnPayload.turn":
+		if e.complexity.StartTurnPayload.Turn == nil {
+			break
+		}
+
+		return e.complexity.StartTurnPayload.Turn(childComplexity), true
+
+	case "Turn.drawing":
+		if e.complexity.Turn.Drawing == nil {
+			break
+		}
+
+		return e.complexity.Turn.Drawing(childComplexity), true
+
+	case "Turn.id":
+		if e.complexity.Turn.ID == nil {
+			break
+		}
+
+		return e.complexity.Turn.ID(childComplexity), true
+
+	case "Turn.pokemon":
+		if e.complexity.Turn.Pokemon == nil {
+			break
+		}
+
+		return e.complexity.Turn.Pokemon(childComplexity), true
+
+	case "Turn.roundId":
+		if e.complexity.Turn.RoundID == nil {
+			break
+		}
+
+		return e.complexity.Turn.RoundID(childComplexity), true
+
+	case "Turn.sessionId":
+		if e.complexity.Turn.SessionID == nil {
+			break
+		}
+
+		return e.complexity.Turn.SessionID(childComplexity), true
+
+	case "Turn.userId":
+		if e.complexity.Turn.UserID == nil {
+			break
+		}
+
+		return e.complexity.Turn.UserID(childComplexity), true
 
 	case "User.id":
 		if e.complexity.User.ID == nil {
@@ -208,29 +426,218 @@ func (ec *executionContext) introspectType(name string) (*introspection.Type, er
 }
 
 var parsedSchema = gqlparser.MustLoadSchema(
-	&ast.Source{Name: "schema.graphql", Input: `type Todo {
+	&ast.Source{Name: "schema.graphql", Input: `"""
+Generation represents the pokemon generational period.
+"""
+type Generation {
+  # The unique id for generation, equivalent to its generation number
   id: ID!
-  text: String!
-  done: Boolean!
-  user: User!
+  # The display name for the generation number
+  displayName: String!
 }
 
-type User {
+"""
+Pokemon represents the pokedex information for a pokemon.
+"""
+type Pokemon {
+  # The unique id of the pokemon, equivalent to its pokedex number
   id: ID!
+  # The name of the pokemon
   name: String!
+  # A url of the pokemon's image
+  image: String!
+  # The generation the pokemon was created in
+  generation: Int!
 }
 
 type Query {
-  todos: [Todo!]!
+  """
+  Look up all available generations.
+  """
+  generations: Generation
+
+  """
+  Look up a pokemon by its ` + "`" + `id` + "`" + ` (pokedex number).
+  """
+  pokemon(input: ID!): Pokemon
 }
 
-input NewTodo {
-  text: String!
-  userId: String!
+"""
+User represents a player in the game
+"""
+type User {
+  # The unique id of a user
+  id: ID!
+  # The display name for the user profile
+  name: String!
+}
+
+"""
+GameSession represents the session users can join to play the game together
+"""
+type GameSession {
+  # The unique id of a session
+  id: ID!
+  # An array of users in the session
+  users: [User!]
+}
+
+"""
+NewGameSession represents a new session created by a user
+"""
+input NewGameSession {
+  userId: ID!
+}
+
+"""
+CreateGameInput represents the input to the createGame mutation
+"""
+input CreateGameInput {
+  # A new session created by a user
+  newGameSession: NewGameSession!
+}
+
+"""
+CreateGamePayload represents the output to the createGame mutation
+"""
+type CreateGamePayload {
+  # The new game session
+  gameSession: GameSession!
+}
+
+"""
+GameInvite represents the information needed to add a new player to a session
+"""
+input GameInvite {
+  # The id of the session to join
+  sessionId: ID!
+  # The display name for the user
+  userName: String!
+}
+
+"""
+JoinGameInput represents the input to the joinGame mutation
+"""
+input JoinGameInput {
+  # The information a user needs to join a game
+  invite: GameInvite!
+}
+
+"""
+JoinGamePayload represents the output to the joinGame mutation
+"""
+type JoinGamePayload {
+  # The updated game session including the newly joined user
+  session: GameSession!
+}
+
+"""
+GameRound is the collection of player turns that occurs at the same time
+"""
+type GameRound {
+  # A unique id for a round within a turn of a game session
+  id: ID!
+  # The id of the current game session 
+  sessionId: ID!
+}
+
+"""
+Drawing represents the drawing done by a user on the canvas
+"""
+type Drawing {
+  # The url captured from the canvas after a turn is ended
+  url: String!
+}
+
+"""
+A Turn represents the gameplay for a user within a round
+"""
+type Turn {
+  # The unique id of the turn
+  id: ID!
+  # The id of the user who's turn it is
+  userId: ID!
+  # The pokemon being drawn
+  pokemon: Pokemon!
+  # The drawing captured from the canvas after a turn is ended
+  drawing: Drawing
+  # The round the turn occurs within
+  roundId: ID!
+  # The session the turn occurs within
+  sessionId: ID!
+}
+
+"""
+StartTurnInput represents the information needed to start a turn
+"""
+input NewTurn {
+  # The id of the user who's turn it is
+  userId: ID!
+  # The id of the round the turn occurs within
+  roundId: ID!
+  # The id of the session the turn occurs within
+  sessionId: ID!
+}
+
+"""
+StartTurnInput represents the input to the startTurn mutation
+"""
+input StartTurnInput {
+  newTurn: NewTurn!
+}
+
+"""
+StartTurnPayload represents the output to the startTurn mutation
+"""
+type StartTurnPayload {
+  # The turn for a user within a round
+  turn: Turn!
+}
+
+"""
+NewDrawing represents the drawing done by a user on the canvas
+"""
+input NewDrawing {
+  # The drawing url captured from the canvas after a turn is ended
+  drawing: String!
+}
+
+"""
+EndTurnInput represents the input to the endTurn mutation
+"""
+input EndTurnInput {
+  # The drawing captured from the canvas after a turn is ended
+  newDrawing: NewDrawing!
+}
+
+"""
+EndTurnPayload represents the output to the endTurn mutation
+"""
+type EndTurnPayload {
+  # The turn for a user within a round, now including the drawing
+  turn: Turn!
 }
 
 type Mutation {
-  createTodo(input: NewTodo!): Todo!
+  """
+  Start a new game session as the host.
+  """
+  createGame(input: CreateGameInput!): CreateGamePayload!
+
+  """
+  Join a game as an additional player.
+  """
+  joinGame(input: JoinGameInput!): JoinGamePayload!
+
+  """
+  Begin a turn.
+  """
+  startTurn(input: StartTurnInput!): StartTurnPayload!
+
+  """
+  End a turn.
+  """
+  endTurn(input: EndTurnInput!): EndTurnPayload!
 }
 `},
 )
@@ -239,12 +646,54 @@ type Mutation {
 
 // region    ***************************** args.gotpl *****************************
 
-func (ec *executionContext) field_Mutation_createTodo_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+func (ec *executionContext) field_Mutation_createGame_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
-	var arg0 NewTodo
+	var arg0 CreateGameInput
 	if tmp, ok := rawArgs["input"]; ok {
-		arg0, err = ec.unmarshalNNewTodo2githubᚗcomᚋclwisemanᚋletsgopokemonᚋinternalᚋgraphqlᚐNewTodo(ctx, tmp)
+		arg0, err = ec.unmarshalNCreateGameInput2githubᚗcomᚋclwisemanᚋletsgopokemonᚋinternalᚋgraphqlᚐCreateGameInput(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["input"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) field_Mutation_endTurn_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 EndTurnInput
+	if tmp, ok := rawArgs["input"]; ok {
+		arg0, err = ec.unmarshalNEndTurnInput2githubᚗcomᚋclwisemanᚋletsgopokemonᚋinternalᚋgraphqlᚐEndTurnInput(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["input"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) field_Mutation_joinGame_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 JoinGameInput
+	if tmp, ok := rawArgs["input"]; ok {
+		arg0, err = ec.unmarshalNJoinGameInput2githubᚗcomᚋclwisemanᚋletsgopokemonᚋinternalᚋgraphqlᚐJoinGameInput(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["input"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) field_Mutation_startTurn_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 StartTurnInput
+	if tmp, ok := rawArgs["input"]; ok {
+		arg0, err = ec.unmarshalNStartTurnInput2githubᚗcomᚋclwisemanᚋletsgopokemonᚋinternalᚋgraphqlᚐStartTurnInput(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -264,6 +713,20 @@ func (ec *executionContext) field_Query___type_args(ctx context.Context, rawArgs
 		}
 	}
 	args["name"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) field_Query_pokemon_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 string
+	if tmp, ok := rawArgs["input"]; ok {
+		arg0, err = ec.unmarshalNID2string(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["input"] = arg0
 	return args, nil
 }
 
@@ -303,7 +766,374 @@ func (ec *executionContext) field___Type_fields_args(ctx context.Context, rawArg
 
 // region    **************************** field.gotpl *****************************
 
-func (ec *executionContext) _Mutation_createTodo(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+func (ec *executionContext) _CreateGamePayload_gameSession(ctx context.Context, field graphql.CollectedField, obj *CreateGamePayload) (ret graphql.Marshaler) {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+		ec.Tracer.EndFieldExecution(ctx)
+	}()
+	rctx := &graphql.ResolverContext{
+		Object:   "CreateGamePayload",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.GameSession, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*GameSession)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+	return ec.marshalNGameSession2ᚖgithubᚗcomᚋclwisemanᚋletsgopokemonᚋinternalᚋgraphqlᚐGameSession(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Drawing_url(ctx context.Context, field graphql.CollectedField, obj *Drawing) (ret graphql.Marshaler) {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+		ec.Tracer.EndFieldExecution(ctx)
+	}()
+	rctx := &graphql.ResolverContext{
+		Object:   "Drawing",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.URL, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _EndTurnPayload_turn(ctx context.Context, field graphql.CollectedField, obj *EndTurnPayload) (ret graphql.Marshaler) {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+		ec.Tracer.EndFieldExecution(ctx)
+	}()
+	rctx := &graphql.ResolverContext{
+		Object:   "EndTurnPayload",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Turn, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*Turn)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+	return ec.marshalNTurn2ᚖgithubᚗcomᚋclwisemanᚋletsgopokemonᚋinternalᚋgraphqlᚐTurn(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _GameRound_id(ctx context.Context, field graphql.CollectedField, obj *GameRound) (ret graphql.Marshaler) {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+		ec.Tracer.EndFieldExecution(ctx)
+	}()
+	rctx := &graphql.ResolverContext{
+		Object:   "GameRound",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.ID, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+	return ec.marshalNID2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _GameRound_sessionId(ctx context.Context, field graphql.CollectedField, obj *GameRound) (ret graphql.Marshaler) {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+		ec.Tracer.EndFieldExecution(ctx)
+	}()
+	rctx := &graphql.ResolverContext{
+		Object:   "GameRound",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.SessionID, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+	return ec.marshalNID2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _GameSession_id(ctx context.Context, field graphql.CollectedField, obj *GameSession) (ret graphql.Marshaler) {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+		ec.Tracer.EndFieldExecution(ctx)
+	}()
+	rctx := &graphql.ResolverContext{
+		Object:   "GameSession",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.ID, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+	return ec.marshalNID2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _GameSession_users(ctx context.Context, field graphql.CollectedField, obj *GameSession) (ret graphql.Marshaler) {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+		ec.Tracer.EndFieldExecution(ctx)
+	}()
+	rctx := &graphql.ResolverContext{
+		Object:   "GameSession",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Users, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.([]*User)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+	return ec.marshalOUser2ᚕᚖgithubᚗcomᚋclwisemanᚋletsgopokemonᚋinternalᚋgraphqlᚐUserᚄ(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Generation_id(ctx context.Context, field graphql.CollectedField, obj *Generation) (ret graphql.Marshaler) {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+		ec.Tracer.EndFieldExecution(ctx)
+	}()
+	rctx := &graphql.ResolverContext{
+		Object:   "Generation",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.ID, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+	return ec.marshalNID2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Generation_displayName(ctx context.Context, field graphql.CollectedField, obj *Generation) (ret graphql.Marshaler) {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+		ec.Tracer.EndFieldExecution(ctx)
+	}()
+	rctx := &graphql.ResolverContext{
+		Object:   "Generation",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.DisplayName, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _JoinGamePayload_session(ctx context.Context, field graphql.CollectedField, obj *JoinGamePayload) (ret graphql.Marshaler) {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+		ec.Tracer.EndFieldExecution(ctx)
+	}()
+	rctx := &graphql.ResolverContext{
+		Object:   "JoinGamePayload",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Session, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*GameSession)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+	return ec.marshalNGameSession2ᚖgithubᚗcomᚋclwisemanᚋletsgopokemonᚋinternalᚋgraphqlᚐGameSession(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Mutation_createGame(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
 	ctx = ec.Tracer.StartFieldExecution(ctx, field)
 	defer func() {
 		if r := recover(); r != nil {
@@ -320,7 +1150,7 @@ func (ec *executionContext) _Mutation_createTodo(ctx context.Context, field grap
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
 	rawArgs := field.ArgumentMap(ec.Variables)
-	args, err := ec.field_Mutation_createTodo_args(ctx, rawArgs)
+	args, err := ec.field_Mutation_createGame_args(ctx, rawArgs)
 	if err != nil {
 		ec.Error(ctx, err)
 		return graphql.Null
@@ -329,7 +1159,7 @@ func (ec *executionContext) _Mutation_createTodo(ctx context.Context, field grap
 	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().CreateTodo(rctx, args["input"].(NewTodo))
+		return ec.resolvers.Mutation().CreateGame(rctx, args["input"].(CreateGameInput))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -341,13 +1171,293 @@ func (ec *executionContext) _Mutation_createTodo(ctx context.Context, field grap
 		}
 		return graphql.Null
 	}
-	res := resTmp.(*Todo)
+	res := resTmp.(*CreateGamePayload)
 	rctx.Result = res
 	ctx = ec.Tracer.StartFieldChildExecution(ctx)
-	return ec.marshalNTodo2ᚖgithubᚗcomᚋclwisemanᚋletsgopokemonᚋinternalᚋgraphqlᚐTodo(ctx, field.Selections, res)
+	return ec.marshalNCreateGamePayload2ᚖgithubᚗcomᚋclwisemanᚋletsgopokemonᚋinternalᚋgraphqlᚐCreateGamePayload(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _Query_todos(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+func (ec *executionContext) _Mutation_joinGame(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+		ec.Tracer.EndFieldExecution(ctx)
+	}()
+	rctx := &graphql.ResolverContext{
+		Object:   "Mutation",
+		Field:    field,
+		Args:     nil,
+		IsMethod: true,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := ec.field_Mutation_joinGame_args(ctx, rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	rctx.Args = args
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Mutation().JoinGame(rctx, args["input"].(JoinGameInput))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*JoinGamePayload)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+	return ec.marshalNJoinGamePayload2ᚖgithubᚗcomᚋclwisemanᚋletsgopokemonᚋinternalᚋgraphqlᚐJoinGamePayload(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Mutation_startTurn(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+		ec.Tracer.EndFieldExecution(ctx)
+	}()
+	rctx := &graphql.ResolverContext{
+		Object:   "Mutation",
+		Field:    field,
+		Args:     nil,
+		IsMethod: true,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := ec.field_Mutation_startTurn_args(ctx, rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	rctx.Args = args
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Mutation().StartTurn(rctx, args["input"].(StartTurnInput))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*StartTurnPayload)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+	return ec.marshalNStartTurnPayload2ᚖgithubᚗcomᚋclwisemanᚋletsgopokemonᚋinternalᚋgraphqlᚐStartTurnPayload(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Mutation_endTurn(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+		ec.Tracer.EndFieldExecution(ctx)
+	}()
+	rctx := &graphql.ResolverContext{
+		Object:   "Mutation",
+		Field:    field,
+		Args:     nil,
+		IsMethod: true,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := ec.field_Mutation_endTurn_args(ctx, rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	rctx.Args = args
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Mutation().EndTurn(rctx, args["input"].(EndTurnInput))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*EndTurnPayload)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+	return ec.marshalNEndTurnPayload2ᚖgithubᚗcomᚋclwisemanᚋletsgopokemonᚋinternalᚋgraphqlᚐEndTurnPayload(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Pokemon_id(ctx context.Context, field graphql.CollectedField, obj *Pokemon) (ret graphql.Marshaler) {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+		ec.Tracer.EndFieldExecution(ctx)
+	}()
+	rctx := &graphql.ResolverContext{
+		Object:   "Pokemon",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.ID, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+	return ec.marshalNID2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Pokemon_name(ctx context.Context, field graphql.CollectedField, obj *Pokemon) (ret graphql.Marshaler) {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+		ec.Tracer.EndFieldExecution(ctx)
+	}()
+	rctx := &graphql.ResolverContext{
+		Object:   "Pokemon",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Name, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Pokemon_image(ctx context.Context, field graphql.CollectedField, obj *Pokemon) (ret graphql.Marshaler) {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+		ec.Tracer.EndFieldExecution(ctx)
+	}()
+	rctx := &graphql.ResolverContext{
+		Object:   "Pokemon",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Image, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Pokemon_generation(ctx context.Context, field graphql.CollectedField, obj *Pokemon) (ret graphql.Marshaler) {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+		ec.Tracer.EndFieldExecution(ctx)
+	}()
+	rctx := &graphql.ResolverContext{
+		Object:   "Pokemon",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Generation, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(int)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+	return ec.marshalNInt2int(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Query_generations(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
 	ctx = ec.Tracer.StartFieldExecution(ctx, field)
 	defer func() {
 		if r := recover(); r != nil {
@@ -366,22 +1476,60 @@ func (ec *executionContext) _Query_todos(ctx context.Context, field graphql.Coll
 	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Query().Todos(rctx)
+		return ec.resolvers.Query().Generations(rctx)
 	})
 	if err != nil {
 		ec.Error(ctx, err)
 		return graphql.Null
 	}
 	if resTmp == nil {
-		if !ec.HasError(rctx) {
-			ec.Errorf(ctx, "must not be null")
-		}
 		return graphql.Null
 	}
-	res := resTmp.([]*Todo)
+	res := resTmp.(*Generation)
 	rctx.Result = res
 	ctx = ec.Tracer.StartFieldChildExecution(ctx)
-	return ec.marshalNTodo2ᚕᚖgithubᚗcomᚋclwisemanᚋletsgopokemonᚋinternalᚋgraphqlᚐTodoᚄ(ctx, field.Selections, res)
+	return ec.marshalOGeneration2ᚖgithubᚗcomᚋclwisemanᚋletsgopokemonᚋinternalᚋgraphqlᚐGeneration(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Query_pokemon(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+		ec.Tracer.EndFieldExecution(ctx)
+	}()
+	rctx := &graphql.ResolverContext{
+		Object:   "Query",
+		Field:    field,
+		Args:     nil,
+		IsMethod: true,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := ec.field_Query_pokemon_args(ctx, rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	rctx.Args = args
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Query().Pokemon(rctx, args["input"].(string))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*Pokemon)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+	return ec.marshalOPokemon2ᚖgithubᚗcomᚋclwisemanᚋletsgopokemonᚋinternalᚋgraphqlᚐPokemon(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Query___type(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
@@ -459,7 +1607,7 @@ func (ec *executionContext) _Query___schema(ctx context.Context, field graphql.C
 	return ec.marshalO__Schema2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚋintrospectionᚐSchema(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _Todo_id(ctx context.Context, field graphql.CollectedField, obj *Todo) (ret graphql.Marshaler) {
+func (ec *executionContext) _StartTurnPayload_turn(ctx context.Context, field graphql.CollectedField, obj *StartTurnPayload) (ret graphql.Marshaler) {
 	ctx = ec.Tracer.StartFieldExecution(ctx, field)
 	defer func() {
 		if r := recover(); r != nil {
@@ -469,7 +1617,44 @@ func (ec *executionContext) _Todo_id(ctx context.Context, field graphql.Collecte
 		ec.Tracer.EndFieldExecution(ctx)
 	}()
 	rctx := &graphql.ResolverContext{
-		Object:   "Todo",
+		Object:   "StartTurnPayload",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Turn, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*Turn)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+	return ec.marshalNTurn2ᚖgithubᚗcomᚋclwisemanᚋletsgopokemonᚋinternalᚋgraphqlᚐTurn(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Turn_id(ctx context.Context, field graphql.CollectedField, obj *Turn) (ret graphql.Marshaler) {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+		ec.Tracer.EndFieldExecution(ctx)
+	}()
+	rctx := &graphql.ResolverContext{
+		Object:   "Turn",
 		Field:    field,
 		Args:     nil,
 		IsMethod: false,
@@ -496,7 +1681,7 @@ func (ec *executionContext) _Todo_id(ctx context.Context, field graphql.Collecte
 	return ec.marshalNID2string(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _Todo_text(ctx context.Context, field graphql.CollectedField, obj *Todo) (ret graphql.Marshaler) {
+func (ec *executionContext) _Turn_userId(ctx context.Context, field graphql.CollectedField, obj *Turn) (ret graphql.Marshaler) {
 	ctx = ec.Tracer.StartFieldExecution(ctx, field)
 	defer func() {
 		if r := recover(); r != nil {
@@ -506,7 +1691,7 @@ func (ec *executionContext) _Todo_text(ctx context.Context, field graphql.Collec
 		ec.Tracer.EndFieldExecution(ctx)
 	}()
 	rctx := &graphql.ResolverContext{
-		Object:   "Todo",
+		Object:   "Turn",
 		Field:    field,
 		Args:     nil,
 		IsMethod: false,
@@ -515,7 +1700,7 @@ func (ec *executionContext) _Todo_text(ctx context.Context, field graphql.Collec
 	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return obj.Text, nil
+		return obj.UserID, nil
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -530,10 +1715,10 @@ func (ec *executionContext) _Todo_text(ctx context.Context, field graphql.Collec
 	res := resTmp.(string)
 	rctx.Result = res
 	ctx = ec.Tracer.StartFieldChildExecution(ctx)
-	return ec.marshalNString2string(ctx, field.Selections, res)
+	return ec.marshalNID2string(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _Todo_done(ctx context.Context, field graphql.CollectedField, obj *Todo) (ret graphql.Marshaler) {
+func (ec *executionContext) _Turn_pokemon(ctx context.Context, field graphql.CollectedField, obj *Turn) (ret graphql.Marshaler) {
 	ctx = ec.Tracer.StartFieldExecution(ctx, field)
 	defer func() {
 		if r := recover(); r != nil {
@@ -543,7 +1728,7 @@ func (ec *executionContext) _Todo_done(ctx context.Context, field graphql.Collec
 		ec.Tracer.EndFieldExecution(ctx)
 	}()
 	rctx := &graphql.ResolverContext{
-		Object:   "Todo",
+		Object:   "Turn",
 		Field:    field,
 		Args:     nil,
 		IsMethod: false,
@@ -552,7 +1737,7 @@ func (ec *executionContext) _Todo_done(ctx context.Context, field graphql.Collec
 	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return obj.Done, nil
+		return obj.Pokemon, nil
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -564,13 +1749,13 @@ func (ec *executionContext) _Todo_done(ctx context.Context, field graphql.Collec
 		}
 		return graphql.Null
 	}
-	res := resTmp.(bool)
+	res := resTmp.(*Pokemon)
 	rctx.Result = res
 	ctx = ec.Tracer.StartFieldChildExecution(ctx)
-	return ec.marshalNBoolean2bool(ctx, field.Selections, res)
+	return ec.marshalNPokemon2ᚖgithubᚗcomᚋclwisemanᚋletsgopokemonᚋinternalᚋgraphqlᚐPokemon(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _Todo_user(ctx context.Context, field graphql.CollectedField, obj *Todo) (ret graphql.Marshaler) {
+func (ec *executionContext) _Turn_drawing(ctx context.Context, field graphql.CollectedField, obj *Turn) (ret graphql.Marshaler) {
 	ctx = ec.Tracer.StartFieldExecution(ctx, field)
 	defer func() {
 		if r := recover(); r != nil {
@@ -580,7 +1765,7 @@ func (ec *executionContext) _Todo_user(ctx context.Context, field graphql.Collec
 		ec.Tracer.EndFieldExecution(ctx)
 	}()
 	rctx := &graphql.ResolverContext{
-		Object:   "Todo",
+		Object:   "Turn",
 		Field:    field,
 		Args:     nil,
 		IsMethod: false,
@@ -589,7 +1774,41 @@ func (ec *executionContext) _Todo_user(ctx context.Context, field graphql.Collec
 	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return obj.User, nil
+		return obj.Drawing, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*Drawing)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+	return ec.marshalODrawing2ᚖgithubᚗcomᚋclwisemanᚋletsgopokemonᚋinternalᚋgraphqlᚐDrawing(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Turn_roundId(ctx context.Context, field graphql.CollectedField, obj *Turn) (ret graphql.Marshaler) {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+		ec.Tracer.EndFieldExecution(ctx)
+	}()
+	rctx := &graphql.ResolverContext{
+		Object:   "Turn",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.RoundID, nil
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -601,10 +1820,47 @@ func (ec *executionContext) _Todo_user(ctx context.Context, field graphql.Collec
 		}
 		return graphql.Null
 	}
-	res := resTmp.(*User)
+	res := resTmp.(string)
 	rctx.Result = res
 	ctx = ec.Tracer.StartFieldChildExecution(ctx)
-	return ec.marshalNUser2ᚖgithubᚗcomᚋclwisemanᚋletsgopokemonᚋinternalᚋgraphqlᚐUser(ctx, field.Selections, res)
+	return ec.marshalNID2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Turn_sessionId(ctx context.Context, field graphql.CollectedField, obj *Turn) (ret graphql.Marshaler) {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+		ec.Tracer.EndFieldExecution(ctx)
+	}()
+	rctx := &graphql.ResolverContext{
+		Object:   "Turn",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.SessionID, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+	return ec.marshalNID2string(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _User_id(ctx context.Context, field graphql.CollectedField, obj *User) (ret graphql.Marshaler) {
@@ -1832,21 +3088,159 @@ func (ec *executionContext) ___Type_ofType(ctx context.Context, field graphql.Co
 
 // region    **************************** input.gotpl *****************************
 
-func (ec *executionContext) unmarshalInputNewTodo(ctx context.Context, obj interface{}) (NewTodo, error) {
-	var it NewTodo
+func (ec *executionContext) unmarshalInputCreateGameInput(ctx context.Context, obj interface{}) (CreateGameInput, error) {
+	var it CreateGameInput
 	var asMap = obj.(map[string]interface{})
 
 	for k, v := range asMap {
 		switch k {
-		case "text":
+		case "newGameSession":
 			var err error
-			it.Text, err = ec.unmarshalNString2string(ctx, v)
+			it.NewGameSession, err = ec.unmarshalNNewGameSession2ᚖgithubᚗcomᚋclwisemanᚋletsgopokemonᚋinternalᚋgraphqlᚐNewGameSession(ctx, v)
 			if err != nil {
 				return it, err
 			}
+		}
+	}
+
+	return it, nil
+}
+
+func (ec *executionContext) unmarshalInputEndTurnInput(ctx context.Context, obj interface{}) (EndTurnInput, error) {
+	var it EndTurnInput
+	var asMap = obj.(map[string]interface{})
+
+	for k, v := range asMap {
+		switch k {
+		case "newDrawing":
+			var err error
+			it.NewDrawing, err = ec.unmarshalNNewDrawing2ᚖgithubᚗcomᚋclwisemanᚋletsgopokemonᚋinternalᚋgraphqlᚐNewDrawing(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		}
+	}
+
+	return it, nil
+}
+
+func (ec *executionContext) unmarshalInputGameInvite(ctx context.Context, obj interface{}) (GameInvite, error) {
+	var it GameInvite
+	var asMap = obj.(map[string]interface{})
+
+	for k, v := range asMap {
+		switch k {
+		case "sessionId":
+			var err error
+			it.SessionID, err = ec.unmarshalNID2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "userName":
+			var err error
+			it.UserName, err = ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		}
+	}
+
+	return it, nil
+}
+
+func (ec *executionContext) unmarshalInputJoinGameInput(ctx context.Context, obj interface{}) (JoinGameInput, error) {
+	var it JoinGameInput
+	var asMap = obj.(map[string]interface{})
+
+	for k, v := range asMap {
+		switch k {
+		case "invite":
+			var err error
+			it.Invite, err = ec.unmarshalNGameInvite2ᚖgithubᚗcomᚋclwisemanᚋletsgopokemonᚋinternalᚋgraphqlᚐGameInvite(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		}
+	}
+
+	return it, nil
+}
+
+func (ec *executionContext) unmarshalInputNewDrawing(ctx context.Context, obj interface{}) (NewDrawing, error) {
+	var it NewDrawing
+	var asMap = obj.(map[string]interface{})
+
+	for k, v := range asMap {
+		switch k {
+		case "drawing":
+			var err error
+			it.Drawing, err = ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		}
+	}
+
+	return it, nil
+}
+
+func (ec *executionContext) unmarshalInputNewGameSession(ctx context.Context, obj interface{}) (NewGameSession, error) {
+	var it NewGameSession
+	var asMap = obj.(map[string]interface{})
+
+	for k, v := range asMap {
+		switch k {
 		case "userId":
 			var err error
-			it.UserID, err = ec.unmarshalNString2string(ctx, v)
+			it.UserID, err = ec.unmarshalNID2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		}
+	}
+
+	return it, nil
+}
+
+func (ec *executionContext) unmarshalInputNewTurn(ctx context.Context, obj interface{}) (NewTurn, error) {
+	var it NewTurn
+	var asMap = obj.(map[string]interface{})
+
+	for k, v := range asMap {
+		switch k {
+		case "userId":
+			var err error
+			it.UserID, err = ec.unmarshalNID2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "roundId":
+			var err error
+			it.RoundID, err = ec.unmarshalNID2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "sessionId":
+			var err error
+			it.SessionID, err = ec.unmarshalNID2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		}
+	}
+
+	return it, nil
+}
+
+func (ec *executionContext) unmarshalInputStartTurnInput(ctx context.Context, obj interface{}) (StartTurnInput, error) {
+	var it StartTurnInput
+	var asMap = obj.(map[string]interface{})
+
+	for k, v := range asMap {
+		switch k {
+		case "newTurn":
+			var err error
+			it.NewTurn, err = ec.unmarshalNNewTurn2ᚖgithubᚗcomᚋclwisemanᚋletsgopokemonᚋinternalᚋgraphqlᚐNewTurn(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -1864,6 +3258,207 @@ func (ec *executionContext) unmarshalInputNewTodo(ctx context.Context, obj inter
 
 // region    **************************** object.gotpl ****************************
 
+var createGamePayloadImplementors = []string{"CreateGamePayload"}
+
+func (ec *executionContext) _CreateGamePayload(ctx context.Context, sel ast.SelectionSet, obj *CreateGamePayload) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.RequestContext, sel, createGamePayloadImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	var invalids uint32
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("CreateGamePayload")
+		case "gameSession":
+			out.Values[i] = ec._CreateGamePayload_gameSession(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch()
+	if invalids > 0 {
+		return graphql.Null
+	}
+	return out
+}
+
+var drawingImplementors = []string{"Drawing"}
+
+func (ec *executionContext) _Drawing(ctx context.Context, sel ast.SelectionSet, obj *Drawing) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.RequestContext, sel, drawingImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	var invalids uint32
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("Drawing")
+		case "url":
+			out.Values[i] = ec._Drawing_url(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch()
+	if invalids > 0 {
+		return graphql.Null
+	}
+	return out
+}
+
+var endTurnPayloadImplementors = []string{"EndTurnPayload"}
+
+func (ec *executionContext) _EndTurnPayload(ctx context.Context, sel ast.SelectionSet, obj *EndTurnPayload) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.RequestContext, sel, endTurnPayloadImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	var invalids uint32
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("EndTurnPayload")
+		case "turn":
+			out.Values[i] = ec._EndTurnPayload_turn(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch()
+	if invalids > 0 {
+		return graphql.Null
+	}
+	return out
+}
+
+var gameRoundImplementors = []string{"GameRound"}
+
+func (ec *executionContext) _GameRound(ctx context.Context, sel ast.SelectionSet, obj *GameRound) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.RequestContext, sel, gameRoundImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	var invalids uint32
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("GameRound")
+		case "id":
+			out.Values[i] = ec._GameRound_id(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "sessionId":
+			out.Values[i] = ec._GameRound_sessionId(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch()
+	if invalids > 0 {
+		return graphql.Null
+	}
+	return out
+}
+
+var gameSessionImplementors = []string{"GameSession"}
+
+func (ec *executionContext) _GameSession(ctx context.Context, sel ast.SelectionSet, obj *GameSession) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.RequestContext, sel, gameSessionImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	var invalids uint32
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("GameSession")
+		case "id":
+			out.Values[i] = ec._GameSession_id(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "users":
+			out.Values[i] = ec._GameSession_users(ctx, field, obj)
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch()
+	if invalids > 0 {
+		return graphql.Null
+	}
+	return out
+}
+
+var generationImplementors = []string{"Generation"}
+
+func (ec *executionContext) _Generation(ctx context.Context, sel ast.SelectionSet, obj *Generation) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.RequestContext, sel, generationImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	var invalids uint32
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("Generation")
+		case "id":
+			out.Values[i] = ec._Generation_id(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "displayName":
+			out.Values[i] = ec._Generation_displayName(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch()
+	if invalids > 0 {
+		return graphql.Null
+	}
+	return out
+}
+
+var joinGamePayloadImplementors = []string{"JoinGamePayload"}
+
+func (ec *executionContext) _JoinGamePayload(ctx context.Context, sel ast.SelectionSet, obj *JoinGamePayload) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.RequestContext, sel, joinGamePayloadImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	var invalids uint32
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("JoinGamePayload")
+		case "session":
+			out.Values[i] = ec._JoinGamePayload_session(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch()
+	if invalids > 0 {
+		return graphql.Null
+	}
+	return out
+}
+
 var mutationImplementors = []string{"Mutation"}
 
 func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet) graphql.Marshaler {
@@ -1879,8 +3474,65 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 		switch field.Name {
 		case "__typename":
 			out.Values[i] = graphql.MarshalString("Mutation")
-		case "createTodo":
-			out.Values[i] = ec._Mutation_createTodo(ctx, field)
+		case "createGame":
+			out.Values[i] = ec._Mutation_createGame(ctx, field)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "joinGame":
+			out.Values[i] = ec._Mutation_joinGame(ctx, field)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "startTurn":
+			out.Values[i] = ec._Mutation_startTurn(ctx, field)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "endTurn":
+			out.Values[i] = ec._Mutation_endTurn(ctx, field)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch()
+	if invalids > 0 {
+		return graphql.Null
+	}
+	return out
+}
+
+var pokemonImplementors = []string{"Pokemon"}
+
+func (ec *executionContext) _Pokemon(ctx context.Context, sel ast.SelectionSet, obj *Pokemon) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.RequestContext, sel, pokemonImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	var invalids uint32
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("Pokemon")
+		case "id":
+			out.Values[i] = ec._Pokemon_id(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "name":
+			out.Values[i] = ec._Pokemon_name(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "image":
+			out.Values[i] = ec._Pokemon_image(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "generation":
+			out.Values[i] = ec._Pokemon_generation(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
@@ -1910,7 +3562,7 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 		switch field.Name {
 		case "__typename":
 			out.Values[i] = graphql.MarshalString("Query")
-		case "todos":
+		case "generations":
 			field := field
 			out.Concurrently(i, func() (res graphql.Marshaler) {
 				defer func() {
@@ -1918,10 +3570,18 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 						ec.Error(ctx, ec.Recover(ctx, r))
 					}
 				}()
-				res = ec._Query_todos(ctx, field)
-				if res == graphql.Null {
-					atomic.AddUint32(&invalids, 1)
-				}
+				res = ec._Query_generations(ctx, field)
+				return res
+			})
+		case "pokemon":
+			field := field
+			out.Concurrently(i, func() (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Query_pokemon(ctx, field)
 				return res
 			})
 		case "__type":
@@ -1939,34 +3599,68 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 	return out
 }
 
-var todoImplementors = []string{"Todo"}
+var startTurnPayloadImplementors = []string{"StartTurnPayload"}
 
-func (ec *executionContext) _Todo(ctx context.Context, sel ast.SelectionSet, obj *Todo) graphql.Marshaler {
-	fields := graphql.CollectFields(ec.RequestContext, sel, todoImplementors)
+func (ec *executionContext) _StartTurnPayload(ctx context.Context, sel ast.SelectionSet, obj *StartTurnPayload) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.RequestContext, sel, startTurnPayloadImplementors)
 
 	out := graphql.NewFieldSet(fields)
 	var invalids uint32
 	for i, field := range fields {
 		switch field.Name {
 		case "__typename":
-			out.Values[i] = graphql.MarshalString("Todo")
+			out.Values[i] = graphql.MarshalString("StartTurnPayload")
+		case "turn":
+			out.Values[i] = ec._StartTurnPayload_turn(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch()
+	if invalids > 0 {
+		return graphql.Null
+	}
+	return out
+}
+
+var turnImplementors = []string{"Turn"}
+
+func (ec *executionContext) _Turn(ctx context.Context, sel ast.SelectionSet, obj *Turn) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.RequestContext, sel, turnImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	var invalids uint32
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("Turn")
 		case "id":
-			out.Values[i] = ec._Todo_id(ctx, field, obj)
+			out.Values[i] = ec._Turn_id(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
-		case "text":
-			out.Values[i] = ec._Todo_text(ctx, field, obj)
+		case "userId":
+			out.Values[i] = ec._Turn_userId(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
-		case "done":
-			out.Values[i] = ec._Todo_done(ctx, field, obj)
+		case "pokemon":
+			out.Values[i] = ec._Turn_pokemon(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
-		case "user":
-			out.Values[i] = ec._Todo_user(ctx, field, obj)
+		case "drawing":
+			out.Values[i] = ec._Turn_drawing(ctx, field, obj)
+		case "roundId":
+			out.Values[i] = ec._Turn_roundId(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "sessionId":
+			out.Values[i] = ec._Turn_sessionId(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
@@ -2272,6 +3966,68 @@ func (ec *executionContext) marshalNBoolean2bool(ctx context.Context, sel ast.Se
 	return res
 }
 
+func (ec *executionContext) unmarshalNCreateGameInput2githubᚗcomᚋclwisemanᚋletsgopokemonᚋinternalᚋgraphqlᚐCreateGameInput(ctx context.Context, v interface{}) (CreateGameInput, error) {
+	return ec.unmarshalInputCreateGameInput(ctx, v)
+}
+
+func (ec *executionContext) marshalNCreateGamePayload2githubᚗcomᚋclwisemanᚋletsgopokemonᚋinternalᚋgraphqlᚐCreateGamePayload(ctx context.Context, sel ast.SelectionSet, v CreateGamePayload) graphql.Marshaler {
+	return ec._CreateGamePayload(ctx, sel, &v)
+}
+
+func (ec *executionContext) marshalNCreateGamePayload2ᚖgithubᚗcomᚋclwisemanᚋletsgopokemonᚋinternalᚋgraphqlᚐCreateGamePayload(ctx context.Context, sel ast.SelectionSet, v *CreateGamePayload) graphql.Marshaler {
+	if v == nil {
+		if !ec.HasError(graphql.GetResolverContext(ctx)) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	return ec._CreateGamePayload(ctx, sel, v)
+}
+
+func (ec *executionContext) unmarshalNEndTurnInput2githubᚗcomᚋclwisemanᚋletsgopokemonᚋinternalᚋgraphqlᚐEndTurnInput(ctx context.Context, v interface{}) (EndTurnInput, error) {
+	return ec.unmarshalInputEndTurnInput(ctx, v)
+}
+
+func (ec *executionContext) marshalNEndTurnPayload2githubᚗcomᚋclwisemanᚋletsgopokemonᚋinternalᚋgraphqlᚐEndTurnPayload(ctx context.Context, sel ast.SelectionSet, v EndTurnPayload) graphql.Marshaler {
+	return ec._EndTurnPayload(ctx, sel, &v)
+}
+
+func (ec *executionContext) marshalNEndTurnPayload2ᚖgithubᚗcomᚋclwisemanᚋletsgopokemonᚋinternalᚋgraphqlᚐEndTurnPayload(ctx context.Context, sel ast.SelectionSet, v *EndTurnPayload) graphql.Marshaler {
+	if v == nil {
+		if !ec.HasError(graphql.GetResolverContext(ctx)) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	return ec._EndTurnPayload(ctx, sel, v)
+}
+
+func (ec *executionContext) unmarshalNGameInvite2githubᚗcomᚋclwisemanᚋletsgopokemonᚋinternalᚋgraphqlᚐGameInvite(ctx context.Context, v interface{}) (GameInvite, error) {
+	return ec.unmarshalInputGameInvite(ctx, v)
+}
+
+func (ec *executionContext) unmarshalNGameInvite2ᚖgithubᚗcomᚋclwisemanᚋletsgopokemonᚋinternalᚋgraphqlᚐGameInvite(ctx context.Context, v interface{}) (*GameInvite, error) {
+	if v == nil {
+		return nil, nil
+	}
+	res, err := ec.unmarshalNGameInvite2githubᚗcomᚋclwisemanᚋletsgopokemonᚋinternalᚋgraphqlᚐGameInvite(ctx, v)
+	return &res, err
+}
+
+func (ec *executionContext) marshalNGameSession2githubᚗcomᚋclwisemanᚋletsgopokemonᚋinternalᚋgraphqlᚐGameSession(ctx context.Context, sel ast.SelectionSet, v GameSession) graphql.Marshaler {
+	return ec._GameSession(ctx, sel, &v)
+}
+
+func (ec *executionContext) marshalNGameSession2ᚖgithubᚗcomᚋclwisemanᚋletsgopokemonᚋinternalᚋgraphqlᚐGameSession(ctx context.Context, sel ast.SelectionSet, v *GameSession) graphql.Marshaler {
+	if v == nil {
+		if !ec.HasError(graphql.GetResolverContext(ctx)) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	return ec._GameSession(ctx, sel, v)
+}
+
 func (ec *executionContext) unmarshalNID2string(ctx context.Context, v interface{}) (string, error) {
 	return graphql.UnmarshalID(v)
 }
@@ -2286,8 +4042,104 @@ func (ec *executionContext) marshalNID2string(ctx context.Context, sel ast.Selec
 	return res
 }
 
-func (ec *executionContext) unmarshalNNewTodo2githubᚗcomᚋclwisemanᚋletsgopokemonᚋinternalᚋgraphqlᚐNewTodo(ctx context.Context, v interface{}) (NewTodo, error) {
-	return ec.unmarshalInputNewTodo(ctx, v)
+func (ec *executionContext) unmarshalNInt2int(ctx context.Context, v interface{}) (int, error) {
+	return graphql.UnmarshalInt(v)
+}
+
+func (ec *executionContext) marshalNInt2int(ctx context.Context, sel ast.SelectionSet, v int) graphql.Marshaler {
+	res := graphql.MarshalInt(v)
+	if res == graphql.Null {
+		if !ec.HasError(graphql.GetResolverContext(ctx)) {
+			ec.Errorf(ctx, "must not be null")
+		}
+	}
+	return res
+}
+
+func (ec *executionContext) unmarshalNJoinGameInput2githubᚗcomᚋclwisemanᚋletsgopokemonᚋinternalᚋgraphqlᚐJoinGameInput(ctx context.Context, v interface{}) (JoinGameInput, error) {
+	return ec.unmarshalInputJoinGameInput(ctx, v)
+}
+
+func (ec *executionContext) marshalNJoinGamePayload2githubᚗcomᚋclwisemanᚋletsgopokemonᚋinternalᚋgraphqlᚐJoinGamePayload(ctx context.Context, sel ast.SelectionSet, v JoinGamePayload) graphql.Marshaler {
+	return ec._JoinGamePayload(ctx, sel, &v)
+}
+
+func (ec *executionContext) marshalNJoinGamePayload2ᚖgithubᚗcomᚋclwisemanᚋletsgopokemonᚋinternalᚋgraphqlᚐJoinGamePayload(ctx context.Context, sel ast.SelectionSet, v *JoinGamePayload) graphql.Marshaler {
+	if v == nil {
+		if !ec.HasError(graphql.GetResolverContext(ctx)) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	return ec._JoinGamePayload(ctx, sel, v)
+}
+
+func (ec *executionContext) unmarshalNNewDrawing2githubᚗcomᚋclwisemanᚋletsgopokemonᚋinternalᚋgraphqlᚐNewDrawing(ctx context.Context, v interface{}) (NewDrawing, error) {
+	return ec.unmarshalInputNewDrawing(ctx, v)
+}
+
+func (ec *executionContext) unmarshalNNewDrawing2ᚖgithubᚗcomᚋclwisemanᚋletsgopokemonᚋinternalᚋgraphqlᚐNewDrawing(ctx context.Context, v interface{}) (*NewDrawing, error) {
+	if v == nil {
+		return nil, nil
+	}
+	res, err := ec.unmarshalNNewDrawing2githubᚗcomᚋclwisemanᚋletsgopokemonᚋinternalᚋgraphqlᚐNewDrawing(ctx, v)
+	return &res, err
+}
+
+func (ec *executionContext) unmarshalNNewGameSession2githubᚗcomᚋclwisemanᚋletsgopokemonᚋinternalᚋgraphqlᚐNewGameSession(ctx context.Context, v interface{}) (NewGameSession, error) {
+	return ec.unmarshalInputNewGameSession(ctx, v)
+}
+
+func (ec *executionContext) unmarshalNNewGameSession2ᚖgithubᚗcomᚋclwisemanᚋletsgopokemonᚋinternalᚋgraphqlᚐNewGameSession(ctx context.Context, v interface{}) (*NewGameSession, error) {
+	if v == nil {
+		return nil, nil
+	}
+	res, err := ec.unmarshalNNewGameSession2githubᚗcomᚋclwisemanᚋletsgopokemonᚋinternalᚋgraphqlᚐNewGameSession(ctx, v)
+	return &res, err
+}
+
+func (ec *executionContext) unmarshalNNewTurn2githubᚗcomᚋclwisemanᚋletsgopokemonᚋinternalᚋgraphqlᚐNewTurn(ctx context.Context, v interface{}) (NewTurn, error) {
+	return ec.unmarshalInputNewTurn(ctx, v)
+}
+
+func (ec *executionContext) unmarshalNNewTurn2ᚖgithubᚗcomᚋclwisemanᚋletsgopokemonᚋinternalᚋgraphqlᚐNewTurn(ctx context.Context, v interface{}) (*NewTurn, error) {
+	if v == nil {
+		return nil, nil
+	}
+	res, err := ec.unmarshalNNewTurn2githubᚗcomᚋclwisemanᚋletsgopokemonᚋinternalᚋgraphqlᚐNewTurn(ctx, v)
+	return &res, err
+}
+
+func (ec *executionContext) marshalNPokemon2githubᚗcomᚋclwisemanᚋletsgopokemonᚋinternalᚋgraphqlᚐPokemon(ctx context.Context, sel ast.SelectionSet, v Pokemon) graphql.Marshaler {
+	return ec._Pokemon(ctx, sel, &v)
+}
+
+func (ec *executionContext) marshalNPokemon2ᚖgithubᚗcomᚋclwisemanᚋletsgopokemonᚋinternalᚋgraphqlᚐPokemon(ctx context.Context, sel ast.SelectionSet, v *Pokemon) graphql.Marshaler {
+	if v == nil {
+		if !ec.HasError(graphql.GetResolverContext(ctx)) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	return ec._Pokemon(ctx, sel, v)
+}
+
+func (ec *executionContext) unmarshalNStartTurnInput2githubᚗcomᚋclwisemanᚋletsgopokemonᚋinternalᚋgraphqlᚐStartTurnInput(ctx context.Context, v interface{}) (StartTurnInput, error) {
+	return ec.unmarshalInputStartTurnInput(ctx, v)
+}
+
+func (ec *executionContext) marshalNStartTurnPayload2githubᚗcomᚋclwisemanᚋletsgopokemonᚋinternalᚋgraphqlᚐStartTurnPayload(ctx context.Context, sel ast.SelectionSet, v StartTurnPayload) graphql.Marshaler {
+	return ec._StartTurnPayload(ctx, sel, &v)
+}
+
+func (ec *executionContext) marshalNStartTurnPayload2ᚖgithubᚗcomᚋclwisemanᚋletsgopokemonᚋinternalᚋgraphqlᚐStartTurnPayload(ctx context.Context, sel ast.SelectionSet, v *StartTurnPayload) graphql.Marshaler {
+	if v == nil {
+		if !ec.HasError(graphql.GetResolverContext(ctx)) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	return ec._StartTurnPayload(ctx, sel, v)
 }
 
 func (ec *executionContext) unmarshalNString2string(ctx context.Context, v interface{}) (string, error) {
@@ -2304,55 +4156,18 @@ func (ec *executionContext) marshalNString2string(ctx context.Context, sel ast.S
 	return res
 }
 
-func (ec *executionContext) marshalNTodo2githubᚗcomᚋclwisemanᚋletsgopokemonᚋinternalᚋgraphqlᚐTodo(ctx context.Context, sel ast.SelectionSet, v Todo) graphql.Marshaler {
-	return ec._Todo(ctx, sel, &v)
+func (ec *executionContext) marshalNTurn2githubᚗcomᚋclwisemanᚋletsgopokemonᚋinternalᚋgraphqlᚐTurn(ctx context.Context, sel ast.SelectionSet, v Turn) graphql.Marshaler {
+	return ec._Turn(ctx, sel, &v)
 }
 
-func (ec *executionContext) marshalNTodo2ᚕᚖgithubᚗcomᚋclwisemanᚋletsgopokemonᚋinternalᚋgraphqlᚐTodoᚄ(ctx context.Context, sel ast.SelectionSet, v []*Todo) graphql.Marshaler {
-	ret := make(graphql.Array, len(v))
-	var wg sync.WaitGroup
-	isLen1 := len(v) == 1
-	if !isLen1 {
-		wg.Add(len(v))
-	}
-	for i := range v {
-		i := i
-		rctx := &graphql.ResolverContext{
-			Index:  &i,
-			Result: &v[i],
-		}
-		ctx := graphql.WithResolverContext(ctx, rctx)
-		f := func(i int) {
-			defer func() {
-				if r := recover(); r != nil {
-					ec.Error(ctx, ec.Recover(ctx, r))
-					ret = nil
-				}
-			}()
-			if !isLen1 {
-				defer wg.Done()
-			}
-			ret[i] = ec.marshalNTodo2ᚖgithubᚗcomᚋclwisemanᚋletsgopokemonᚋinternalᚋgraphqlᚐTodo(ctx, sel, v[i])
-		}
-		if isLen1 {
-			f(i)
-		} else {
-			go f(i)
-		}
-
-	}
-	wg.Wait()
-	return ret
-}
-
-func (ec *executionContext) marshalNTodo2ᚖgithubᚗcomᚋclwisemanᚋletsgopokemonᚋinternalᚋgraphqlᚐTodo(ctx context.Context, sel ast.SelectionSet, v *Todo) graphql.Marshaler {
+func (ec *executionContext) marshalNTurn2ᚖgithubᚗcomᚋclwisemanᚋletsgopokemonᚋinternalᚋgraphqlᚐTurn(ctx context.Context, sel ast.SelectionSet, v *Turn) graphql.Marshaler {
 	if v == nil {
 		if !ec.HasError(graphql.GetResolverContext(ctx)) {
 			ec.Errorf(ctx, "must not be null")
 		}
 		return graphql.Null
 	}
-	return ec._Todo(ctx, sel, v)
+	return ec._Turn(ctx, sel, v)
 }
 
 func (ec *executionContext) marshalNUser2githubᚗcomᚋclwisemanᚋletsgopokemonᚋinternalᚋgraphqlᚐUser(ctx context.Context, sel ast.SelectionSet, v User) graphql.Marshaler {
@@ -2618,6 +4433,39 @@ func (ec *executionContext) marshalOBoolean2ᚖbool(ctx context.Context, sel ast
 	return ec.marshalOBoolean2bool(ctx, sel, *v)
 }
 
+func (ec *executionContext) marshalODrawing2githubᚗcomᚋclwisemanᚋletsgopokemonᚋinternalᚋgraphqlᚐDrawing(ctx context.Context, sel ast.SelectionSet, v Drawing) graphql.Marshaler {
+	return ec._Drawing(ctx, sel, &v)
+}
+
+func (ec *executionContext) marshalODrawing2ᚖgithubᚗcomᚋclwisemanᚋletsgopokemonᚋinternalᚋgraphqlᚐDrawing(ctx context.Context, sel ast.SelectionSet, v *Drawing) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	return ec._Drawing(ctx, sel, v)
+}
+
+func (ec *executionContext) marshalOGeneration2githubᚗcomᚋclwisemanᚋletsgopokemonᚋinternalᚋgraphqlᚐGeneration(ctx context.Context, sel ast.SelectionSet, v Generation) graphql.Marshaler {
+	return ec._Generation(ctx, sel, &v)
+}
+
+func (ec *executionContext) marshalOGeneration2ᚖgithubᚗcomᚋclwisemanᚋletsgopokemonᚋinternalᚋgraphqlᚐGeneration(ctx context.Context, sel ast.SelectionSet, v *Generation) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	return ec._Generation(ctx, sel, v)
+}
+
+func (ec *executionContext) marshalOPokemon2githubᚗcomᚋclwisemanᚋletsgopokemonᚋinternalᚋgraphqlᚐPokemon(ctx context.Context, sel ast.SelectionSet, v Pokemon) graphql.Marshaler {
+	return ec._Pokemon(ctx, sel, &v)
+}
+
+func (ec *executionContext) marshalOPokemon2ᚖgithubᚗcomᚋclwisemanᚋletsgopokemonᚋinternalᚋgraphqlᚐPokemon(ctx context.Context, sel ast.SelectionSet, v *Pokemon) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	return ec._Pokemon(ctx, sel, v)
+}
+
 func (ec *executionContext) unmarshalOString2string(ctx context.Context, v interface{}) (string, error) {
 	return graphql.UnmarshalString(v)
 }
@@ -2639,6 +4487,46 @@ func (ec *executionContext) marshalOString2ᚖstring(ctx context.Context, sel as
 		return graphql.Null
 	}
 	return ec.marshalOString2string(ctx, sel, *v)
+}
+
+func (ec *executionContext) marshalOUser2ᚕᚖgithubᚗcomᚋclwisemanᚋletsgopokemonᚋinternalᚋgraphqlᚐUserᚄ(ctx context.Context, sel ast.SelectionSet, v []*User) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	ret := make(graphql.Array, len(v))
+	var wg sync.WaitGroup
+	isLen1 := len(v) == 1
+	if !isLen1 {
+		wg.Add(len(v))
+	}
+	for i := range v {
+		i := i
+		rctx := &graphql.ResolverContext{
+			Index:  &i,
+			Result: &v[i],
+		}
+		ctx := graphql.WithResolverContext(ctx, rctx)
+		f := func(i int) {
+			defer func() {
+				if r := recover(); r != nil {
+					ec.Error(ctx, ec.Recover(ctx, r))
+					ret = nil
+				}
+			}()
+			if !isLen1 {
+				defer wg.Done()
+			}
+			ret[i] = ec.marshalNUser2ᚖgithubᚗcomᚋclwisemanᚋletsgopokemonᚋinternalᚋgraphqlᚐUser(ctx, sel, v[i])
+		}
+		if isLen1 {
+			f(i)
+		} else {
+			go f(i)
+		}
+
+	}
+	wg.Wait()
+	return ret
 }
 
 func (ec *executionContext) marshalO__EnumValue2ᚕgithubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚋintrospectionᚐEnumValueᚄ(ctx context.Context, sel ast.SelectionSet, v []introspection.EnumValue) graphql.Marshaler {

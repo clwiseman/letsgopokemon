@@ -15,12 +15,24 @@ func (r *Resolver) Query() QueryResolver {
 
 type mutationResolver struct{ *Resolver }
 
-func (r *mutationResolver) CreateTodo(ctx context.Context, input NewTodo) (*Todo, error) {
+func (r *mutationResolver) CreateGame(ctx context.Context, input CreateGameInput) (*CreateGamePayload, error) {
+	panic("not implemented")
+}
+func (r *mutationResolver) JoinGame(ctx context.Context, input JoinGameInput) (*JoinGamePayload, error) {
+	panic("not implemented")
+}
+func (r *mutationResolver) StartTurn(ctx context.Context, input StartTurnInput) (*StartTurnPayload, error) {
+	panic("not implemented")
+}
+func (r *mutationResolver) EndTurn(ctx context.Context, input EndTurnInput) (*EndTurnPayload, error) {
 	panic("not implemented")
 }
 
 type queryResolver struct{ *Resolver }
 
-func (r *queryResolver) Todos(ctx context.Context) ([]*Todo, error) {
+func (r *queryResolver) Generations(ctx context.Context) (*Generation, error) {
+	panic("not implemented")
+}
+func (r *queryResolver) Pokemon(ctx context.Context, input string) (*Pokemon, error) {
 	panic("not implemented")
 }

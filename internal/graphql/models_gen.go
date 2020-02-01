@@ -2,18 +2,111 @@
 
 package graphql
 
-type NewTodo struct {
-	Text   string `json:"text"`
+// CreateGameInput represents the input to the createGame mutation
+type CreateGameInput struct {
+	NewGameSession *NewGameSession `json:"newGameSession"`
+}
+
+// CreateGamePayload represents the output to the createGame mutation
+type CreateGamePayload struct {
+	GameSession *GameSession `json:"gameSession"`
+}
+
+// Drawing represents the drawing done by a user on the canvas
+type Drawing struct {
+	URL string `json:"url"`
+}
+
+// EndTurnInput represents the input to the endTurn mutation
+type EndTurnInput struct {
+	NewDrawing *NewDrawing `json:"newDrawing"`
+}
+
+// EndTurnPayload represents the output to the endTurn mutation
+type EndTurnPayload struct {
+	Turn *Turn `json:"turn"`
+}
+
+// GameInvite represents the information needed to add a new player to a session
+type GameInvite struct {
+	SessionID string `json:"sessionId"`
+	UserName  string `json:"userName"`
+}
+
+// GameRound is the collection of player turns that occurs at the same time
+type GameRound struct {
+	ID        string `json:"id"`
+	SessionID string `json:"sessionId"`
+}
+
+// GameSession represents the session users can join to play the game together
+type GameSession struct {
+	ID    string  `json:"id"`
+	Users []*User `json:"users"`
+}
+
+// Generation represents the pokemon generational period.
+type Generation struct {
+	ID          string `json:"id"`
+	DisplayName string `json:"displayName"`
+}
+
+// JoinGameInput represents the input to the joinGame mutation
+type JoinGameInput struct {
+	Invite *GameInvite `json:"invite"`
+}
+
+// JoinGamePayload represents the output to the joinGame mutation
+type JoinGamePayload struct {
+	Session *GameSession `json:"session"`
+}
+
+// NewDrawing represents the drawing done by a user on the canvas
+type NewDrawing struct {
+	Drawing string `json:"drawing"`
+}
+
+// NewGameSession represents a new session created by a user
+type NewGameSession struct {
 	UserID string `json:"userId"`
 }
 
-type Todo struct {
-	ID   string `json:"id"`
-	Text string `json:"text"`
-	Done bool   `json:"done"`
-	User *User  `json:"user"`
+// StartTurnInput represents the information needed to start a turn
+type NewTurn struct {
+	UserID    string `json:"userId"`
+	RoundID   string `json:"roundId"`
+	SessionID string `json:"sessionId"`
 }
 
+// Pokemon represents the pokedex information for a pokemon.
+type Pokemon struct {
+	ID         string `json:"id"`
+	Name       string `json:"name"`
+	Image      string `json:"image"`
+	Generation int    `json:"generation"`
+}
+
+// StartTurnInput represents the input to the startTurn mutation
+type StartTurnInput struct {
+	NewTurn *NewTurn `json:"newTurn"`
+}
+
+// StartTurnPayload represents the output to the startTurn mutation
+type StartTurnPayload struct {
+	Turn *Turn `json:"turn"`
+}
+
+// A Turn represents the gameplay for a user within a round
+type Turn struct {
+	ID        string   `json:"id"`
+	UserID    string   `json:"userId"`
+	Pokemon   *Pokemon `json:"pokemon"`
+	Drawing   *Drawing `json:"drawing"`
+	RoundID   string   `json:"roundId"`
+	SessionID string   `json:"sessionId"`
+}
+
+// User represents a player in the game
 type User struct {
 	ID   string `json:"id"`
 	Name string `json:"name"`
