@@ -26,7 +26,7 @@ type Query {
   """
   Look up all available generations.
   """
-  generations: Generation
+  generations: [Generation]
 
   """
   Look up a pokemon by its `id` (pokedex number).
