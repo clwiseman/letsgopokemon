@@ -12,7 +12,7 @@ require (
 	github.com/jackc/pgx v3.6.2+incompatible
 	github.com/jbowes/vice v0.0.5
 	github.com/konsorten/go-windows-terminal-sequences v1.0.2 // indirect
-	github.com/lib/pq v1.2.0 // indirect
+	github.com/lib/pq v1.2.0
 	github.com/onsi/gomega v1.9.0
 	github.com/shopspring/decimal v0.0.0-20180709203117-cd690d0c9e24 // indirect
 	github.com/sirupsen/logrus v1.4.2

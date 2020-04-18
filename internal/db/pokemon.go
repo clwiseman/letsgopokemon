@@ -5,11 +5,11 @@ import (
 	"database/sql"
 	"net/url"
 
-	"github.com/jbowes/vice"
 	"github.com/Masterminds/squirrel"
 	"github.com/jackc/pgx"
 	"github.com/jackc/pgx/log/logrusadapter"
 	"github.com/jackc/pgx/stdlib"
+	"github.com/jbowes/vice"
 	"github.com/sirupsen/logrus"
 
 	"github.com/clwiseman/letsgopokemon/internal/models"
@@ -50,22 +50,6 @@ func (pd Pokedex) Close() error {
 // 	return nil
 // }
 
-// scanGeneration
-func scanGeneration(row squirrel.RowScanner) (*models.Generation, error) {
-	var gen *models.Generation
-	err := row.Scan(gen.ID, gen.DisplayName) 
-
-	if err != nil {
-		if err == sql.ErrNoRows {
-			return nil, vice.Wrap(err, vice.Internal, "unable to scan row")
-		}
-
-		return nil, err
-	}
-
-	return gen, nil
-}
-
 // ListGenerations lists all the generations currently in the pokedex.
 func (pd Pokedex) ListGenerations(ctx context.Context) ([]*models.Generation, error) {
 	q := pd.sb.Select("id", "display_name").From("generation")
@@ -96,4 +80,20 @@ func (pd Pokedex) ListGenerations(ctx context.Context) ([]*models.Generation, er
 	}
 
 	return generations, nil
+}
+
+// scanGeneration
+func scanGeneration(row squirrel.RowScanner) (*models.Generation, error) {
+	var gen *models.Generation
+	err := row.Scan(gen.ID, gen.DisplayName)
+
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return nil, vice.Wrap(err, vice.Internal, "unable to scan row")
+		}
+
+		return nil, err
+	}
+
+	return gen, nil
 }

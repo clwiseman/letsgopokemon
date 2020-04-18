@@ -12,5 +12,4 @@ If changes are made to the GraphQL schema:
 
 # updating folder structure
 
-If changes are made to the folder structure, update `gqlgen.yml` to ensure schema generation is still pointing to
-the correct files.
+If changes are made to the folder structure, update `gqlgen.yml` to ensure schema generation is still pointing to the correct files.
