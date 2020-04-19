@@ -13,3 +13,11 @@ If changes are made to the GraphQL schema:
 # updating folder structure
 
 If changes are made to the folder structure, update `gqlgen.yml` to ensure schema generation is still pointing to the correct files.
+
+# to run locally
+
+To start GraphQL playground locally:
+
+`go run ./server.go`
+
+It can be accessed on `http://localhost:8080`
