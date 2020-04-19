@@ -1,0 +1,13 @@
+# Custom folder structure
+schema:
+ - "schema/*.graphql"
+exec:
+  filename: internal/generated/generated.go
+  package: generated
+model:
+  filename: internal/models/models.go
+  package: models
+resolver:
+  filename: internal/generated/resolver.go
+  type: Resolver
+  package: generated
