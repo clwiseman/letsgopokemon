@@ -7,13 +7,18 @@ import (
 
 	"github.com/99designs/gqlgen/graphql/handler"
 	"github.com/99designs/gqlgen/graphql/playground"
+
 	resolver "github.com/clwiseman/letsgopokemon/internal"
 	"github.com/clwiseman/letsgopokemon/internal/generated"
+	"github.com/clwiseman/letsgopokemon/internal/pokedex"
 )
 
-const defaultPort = "8080"
+const (
+	defaultPort = "8080"
+)
 
 func main() {
+	// To connect to GraphQL Playground
 	port := os.Getenv("PORT")
 	if port == "" {
 		port = defaultPort
@@ -26,4 +31,7 @@ func main() {
 
 	log.Printf("connect to http://localhost:%s/ for GraphQL playground", port)
 	log.Fatal(http.ListenAndServe(":"+port, nil))
+
+	// Connect to database
+	pd := pokedex.NewPokedex()
 }

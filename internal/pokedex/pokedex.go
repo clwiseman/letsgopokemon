@@ -3,52 +3,43 @@ package pokedex
 import (
 	"context"
 	"database/sql"
-	"net/url"
+	"os"
 
 	"github.com/Masterminds/squirrel"
 	"github.com/jackc/pgx"
-	"github.com/jackc/pgx/log/logrusadapter"
 	"github.com/jackc/pgx/stdlib"
 	"github.com/jbowes/vice"
-	"github.com/sirupsen/logrus"
 
 	"github.com/clwiseman/letsgopokemon/internal/models"
 )
 
 // Pokedex is a directory of pokemon.
 type Pokedex struct {
-	logger *logrus.Logger
 	db     *sql.DB
 	sb     squirrel.StatementBuilderType
 }
 
 // NewPokedex creates a new Pokedex, connecting it to the postgres server on
 // the URL provided.
-func NewPokedex(logger *logrus.Logger, pgURL *url.URL) (*Pokedex, error) {
-	c, err := pgx.ParseURI((pgURL.String()))
+func NewPokedex() *Pokedex {
+	pgURL := os.Getenv("DATABASE_URL")
+	c, err := pgx.ParseURI(pgURL)
 	if err != nil {
-		return nil, err
+		panic("failed to parse database url")
 	}
 
-	c.Logger = logrusadapter.NewLogger(logger)
 	db := stdlib.OpenDB(c)
 
 	return &Pokedex{
-		logger: logger,
 		db:     db,
 		sb:     squirrel.StatementBuilder.PlaceholderFormat(squirrel.Dollar).RunWith(db),
-	}, nil
+	}
 }
 
 // Close releases any resources.
 func (pd Pokedex) Close() error {
 	return pd.db.Close()
 }
-
-// // GetPokemonByID retrieves a pokemon by it's id (pokedex) number.
-// func (pd Pokedex) GetPokemonByID(ctx context.Context, id *graphql) (err error) {
-// 	return nil
-// }
 
 // ListGenerations lists all the generations currently in the pokedex.
 func (pd Pokedex) ListGenerations(ctx context.Context) ([]*models.Generation, error) {

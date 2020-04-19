@@ -4,7 +4,7 @@ import (
 	"context"
 
 	"github.com/clwiseman/letsgopokemon/internal/models"
-	"github.com/clwiseman/letsgopokemon/internal/pokedex"
+	pd "github.com/clwiseman/letsgopokemon/internal/pokedex"
 	"github.com/jbowes/vice"
 )
 
@@ -18,7 +18,7 @@ type QueryResolver interface {
 	Pokemon(ctx context.Context, input string) (*models.Pokemon, error)
 }
 
-type MutationResolver interface{
+type MutationResolver interface {
 	CreateGame(ctx context.Context, input models.CreateGameInput) (*models.CreateGamePayload, error)
 	JoinGame(ctx context.Context, input models.JoinGameInput) (*models.JoinGamePayload, error)
 	StartTurn(ctx context.Context, input models.StartTurnInput) (*models.StartTurnPayload, error)
@@ -50,9 +50,9 @@ func (r *mutationResolver) EndTurn(ctx context.Context, input models.EndTurnInpu
 type queryResolver struct{ *Resolver }
 
 func (r *queryResolver) Generations(ctx context.Context) ([]*models.Generation, error) {
-	gens, err := pokedex.ListGenerations(ctx)
-	err != nil {
-		return nil, vice.Wrap(err, "no generations found")
+	gens, err := pd.Pokedex.ListGenerations(ctx)
+	if err != nil {
+		return nil, vice.Wrap(err, vice.NotFound, "no generations found")
 	}
 
 	r.generations = gens
