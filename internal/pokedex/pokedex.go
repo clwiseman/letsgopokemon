@@ -2,14 +2,12 @@ package pokedex
 
 import (
 	"context"
-	"net/url"
-
-	"github.com/pkg/errors"
-
-	"github.com/clwiseman/letsgopokemon/internal/db_models"
 
 	"github.com/go-pg/pg/v9"
+	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
+
+	"github.com/clwiseman/letsgopokemon/internal/db_models"
 )
 
 // Pokedex is a directory of pokemon.
@@ -19,12 +17,15 @@ type Pokedex struct {
 
 // NewPokedex creates a new Pokedex, connecting it to the postgres server on
 // the URL provided.
-func NewPokedex(ctx context.Context, pgURL *url.URL) (*Pokedex, error) {
-	db := pg.Connect(&pg.Options{
-		Addr: pgURL.String(),
-	})
+func NewPokedex(ctx context.Context, pgURL string) (*Pokedex, error) {
+	dbOptions, err := pg.ParseURL(pgURL)
+	if err != nil {
+		logrus.WithContext(ctx).WithError(err).Error("could not parse connection URL.")
+		return nil, err
+	}
 
-	err := db_models.CreateSchema(db)
+	db := pg.Connect(dbOptions)
+	err = db_models.CreateSchema(db)
 	if err != nil {
 		logrus.WithContext(ctx).WithError(err).Error("could not create database schema.")
 		return nil, err

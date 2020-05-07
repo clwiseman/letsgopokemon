@@ -3,7 +3,6 @@ package generated
 import (
 	"context"
 	"fmt"
-	"net/url"
 	"strconv"
 	"sync"
 
@@ -33,7 +32,7 @@ type Resolver struct {
 	mu    sync.Mutex // nolint: structcheck
 }
 
-func NewResolver(ctx context.Context, pokedexURL *url.URL) (*Resolver, error) {
+func NewResolver(ctx context.Context, pokedexURL string) (*Resolver, error) {
 	pokedx, err := pokedex.NewPokedex(ctx, pokedexURL)
 	if err != nil {
 		return nil, err

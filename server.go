@@ -4,11 +4,11 @@ import (
 	"context"
 	"log"
 	"net/http"
-	"net/url"
 	"os"
 
 	"github.com/99designs/gqlgen/graphql/handler"
 	"github.com/99designs/gqlgen/graphql/playground"
+
 	resolver "github.com/clwiseman/letsgopokemon/internal"
 	"github.com/clwiseman/letsgopokemon/internal/generated"
 )
@@ -24,12 +24,8 @@ func main() {
 	}
 
 	postgresURL := os.Getenv("DATABASE_URL")
-	dbURL, err := url.Parse(postgresURL)
-	if err != nil {
-		panic(err)
-	}
 
-	r, err := resolver.NewResolver(ctx, dbURL)
+	r, err := resolver.NewResolver(ctx, postgresURL)
 	if err != nil {
 		panic(err)
 	}

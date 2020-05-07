@@ -1,6 +1,7 @@
 package db_models
 
 import (
+	"context"
 	"time"
 
 	"github.com/go-pg/pg/v9"
@@ -14,8 +15,10 @@ type BaseModel struct {
 	UpdatedAt time.Time
 }
 
+var _ pg.BeforeInsertHook = (*BaseModel)(nil)
+
 // BeforeInsert is a hook that will set the times when an element is about to get inserted.
-func (m *BaseModel) BeforeInsert(db orm.DB) error {
+func (m *BaseModel) BeforeInsert(ctx context.Context) (context.Context, error) {
 	now := time.Now()
 	if m.CreatedAt.IsZero() {
 		m.CreatedAt = now
@@ -23,13 +26,15 @@ func (m *BaseModel) BeforeInsert(db orm.DB) error {
 	if m.UpdatedAt.IsZero() {
 		m.UpdatedAt = now
 	}
-	return nil
+	return ctx, nil
 }
 
+var _ pg.BeforeUpdateHook = (*BaseModel)(nil)
+
 // BeforeInsert is a hook that will set the times when an element is about to get updated.
-func (m *BaseModel) BeforeUpdate(db orm.DB) error {
+func (m *BaseModel) BeforeUpdate(ctx context.Context) (context.Context, error) {
 	m.UpdatedAt = time.Now()
-	return nil
+	return ctx, nil
 }
 
 // Session is a game session owning users and rounds.
