@@ -2,41 +2,42 @@ package pokedex
 
 import (
 	"context"
-	"database/sql"
 	"net/url"
 
-	"github.com/Masterminds/squirrel"
-	"github.com/jackc/pgx"
-	"github.com/jackc/pgx/log/logrusadapter"
-	"github.com/jackc/pgx/stdlib"
-	"github.com/jbowes/vice"
-	"github.com/sirupsen/logrus"
+	"github.com/pkg/errors"
 
-	"github.com/clwiseman/letsgopokemon/internal/models"
+	"github.com/clwiseman/letsgopokemon/internal/db_models"
+
+	"github.com/go-pg/pg/v9"
+	"github.com/sirupsen/logrus"
 )
 
 // Pokedex is a directory of pokemon.
 type Pokedex struct {
-	logger *logrus.Logger
-	db     *sql.DB
-	sb     squirrel.StatementBuilderType
+	db *pg.DB
 }
 
 // NewPokedex creates a new Pokedex, connecting it to the postgres server on
 // the URL provided.
-func NewPokedex(logger *logrus.Logger, pgURL *url.URL) (*Pokedex, error) {
-	c, err := pgx.ParseURI((pgURL.String()))
+func NewPokedex(ctx context.Context, pgURL *url.URL) (*Pokedex, error) {
+	db := pg.Connect(&pg.Options{
+		Addr: pgURL.String(),
+	})
+
+	err := db_models.CreateSchema(db)
 	if err != nil {
+		logrus.WithContext(ctx).WithError(err).Error("could not create database schema.")
 		return nil, err
 	}
 
-	c.Logger = logrusadapter.NewLogger(logger)
-	db := stdlib.OpenDB(c)
+	err = db_models.InsertDefaults(db)
+	if err != nil {
+		logrus.WithContext(ctx).WithError(err).Error("could not insert default values in the database.")
+		return nil, err
+	}
 
 	return &Pokedex{
-		logger: logger,
-		db:     db,
-		sb:     squirrel.StatementBuilder.PlaceholderFormat(squirrel.Dollar).RunWith(db),
+		db: db,
 	}, nil
 }
 
@@ -45,55 +46,48 @@ func (pd Pokedex) Close() error {
 	return pd.db.Close()
 }
 
-// // GetPokemonByID retrieves a pokemon by it's id (pokedex) number.
-// func (pd Pokedex) GetPokemonByID(ctx context.Context, id *graphql) (err error) {
-// 	return nil
-// }
+// GetPokemonByID retrieves a pokemon by it's id (pokedex) number.
+func (pd Pokedex) GetPokemonByID(ctx context.Context, id int64) (db_models.Pokemon, error) {
+	pokemon := db_models.Pokemon{
+		BaseModel: db_models.BaseModel{
+			Id: id, // This will fetch the right pokemon
+		},
+	}
+
+	err := pd.db.WithContext(ctx).Select(&pokemon)
+	if err != nil {
+		logrus.WithContext(ctx).WithError(err).Error("Could not query pokemon")
+		return db_models.Pokemon{}, errors.Wrap(err, "could not query pokemon")
+	}
+
+	return pokemon, nil
+}
 
 // ListGenerations lists all the generations currently in the pokedex.
-func (pd Pokedex) ListGenerations(ctx context.Context) ([]*models.Generation, error) {
-	q := pd.sb.Select("id", "display_name").From("generation")
+func (pd Pokedex) ListGenerations(ctx context.Context) ([]db_models.Generation, error) {
+	var generations []db_models.Generation
 
-	rows, err := q.QueryContext(ctx)
+	err := pd.db.WithContext(ctx).Model(&generations).Select()
 	if err != nil {
-		return nil, vice.Wrap(err, vice.Internal, "unable to list generations")
-	}
-
-	var generations []*models.Generation
-
-	for rows.Next() {
-		gen, err := scanGeneration(rows)
-		if err != nil {
-			return nil, vice.Wrap(err, vice.Internal, "error scanning row")
-		}
-		generations = append(generations, gen)
-	}
-
-	err = rows.Err()
-	if err != nil {
-		return nil, vice.Wrap(err, vice.Internal, "error during iteration")
-	}
-
-	err = rows.Close()
-	if err != nil {
-		return nil, vice.Wrap(err, vice.Internal, "error closing rows")
+		logrus.WithContext(ctx).WithError(err).Error("Could not query generations")
+		return nil, errors.Wrap(err, "could not query generations")
 	}
 
 	return generations, nil
 }
 
-// scanGeneration
-func scanGeneration(row squirrel.RowScanner) (*models.Generation, error) {
-	var gen *models.Generation
-	err := row.Scan(gen.ID, gen.DisplayName)
+func (pd Pokedex) GetSession(ctx context.Context, userId int64) (db_models.Session, error) {
+	session := db_models.Session{}
 
+	err := pd.db.
+		WithContext(ctx).
+		Model(&session).
+		Where("session.user_id = ?", userId).
+		Select()
 	if err != nil {
-		if err == sql.ErrNoRows {
-			return nil, vice.Wrap(err, vice.Internal, "unable to scan row")
-		}
-
-		return nil, err
+		logrus.WithContext(ctx).WithError(err).Error("Could not query game session")
+		return db_models.Session{}, errors.Wrap(err, "could not query game session")
 	}
 
-	return gen, nil
+	return session, nil
 }

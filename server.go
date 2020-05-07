@@ -1,8 +1,10 @@
 package main
 
 import (
+	"context"
 	"log"
 	"net/http"
+	"net/url"
 	"os"
 
 	"github.com/99designs/gqlgen/graphql/handler"
@@ -14,12 +16,27 @@ import (
 const defaultPort = "8080"
 
 func main() {
+	ctx := context.Background()
+
 	port := os.Getenv("PORT")
 	if port == "" {
 		port = defaultPort
 	}
 
-	srv := handler.NewDefaultServer(generated.NewExecutableSchema(generated.Config{Resolvers: &resolver.Resolver{}}))
+	postgresURL := os.Getenv("DATABASE_URL")
+	dbURL, err := url.Parse(postgresURL)
+	if err != nil {
+		panic(err)
+	}
+
+	r, err := resolver.NewResolver(ctx, dbURL)
+	if err != nil {
+		panic(err)
+	}
+
+	srv := handler.NewDefaultServer(generated.NewExecutableSchema(generated.Config{
+		Resolvers: r,
+	}))
 
 	http.Handle("/", playground.Handler("GraphQL playground", "/query"))
 	http.Handle("/query", srv)

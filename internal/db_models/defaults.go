@@ -1,3 +1,21 @@
+package db_models
+
+import (
+	"github.com/go-pg/pg/v9"
+)
+
+const (
+	generationsSQL = `
+INSERT INTO generation (id, display_name) VALUES 
+(1, 'Gen I'),
+(2, 'Gen II'),
+(3, 'Gen III'),
+(4, 'Gen IV'),
+(5, 'Gen V'),
+(6, 'Gen VI'),
+(7, 'Gen VII');`
+
+	pokemonSQL = `
 INSERT INTO pokemon (id, name) VALUES 
 (1, 'Bulbasaur'),
 (2, 'Ivysaur'),
@@ -807,4 +825,47 @@ INSERT INTO pokemon (id, name) VALUES
 (806, 'Blacephalon'),
 (807, 'Zeraora'),
 (808, 'Meltan'),
-(809, 'Melmetal');
+(809, 'Melmetal');`
+
+	linkPokemonToGenerationsSQL = `
+UPDATE pokemon SET generation =
+    (CASE
+        WHEN id <= 151 THEN 1
+        WHEN id >= 152 AND id <= 251 THEN 2
+        WHEN id >= 252 AND id <= 386 THEN 3
+        WHEN id >= 387 AND id <= 493 THEN 4
+        WHEN id >= 494 AND id <= 649 THEN 5
+        WHEN id >= 650 AND id <= 721 THEN 6
+        WHEN id >= 722 AND id <= 809 THEN 7
+    END)
+;`
+)
+
+func InsertDefaults(db *pg.DB) error {
+	var generation Generation
+	err := db.Model(&generation).First()
+	if err != nil {
+		return err
+	}
+
+	// If generation is already set
+	if generation.Id > 0 {
+		return nil
+	}
+
+	_, err = db.Exec(generationsSQL)
+	if err != nil {
+		return err
+	}
+
+	_, err = db.Exec(pokemonSQL)
+	if err != nil {
+		return err
+	}
+
+	_, err = db.Exec(linkPokemonToGenerationsSQL)
+	if err != nil {
+		return err
+	}
+	return nil
+}

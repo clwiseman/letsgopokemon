@@ -19,6 +19,7 @@ type Drawing struct {
 
 // EndTurnInput represents the input to the endTurn mutation
 type EndTurnInput struct {
+	ID         string      `json:"id"`
 	NewDrawing *NewDrawing `json:"newDrawing"`
 }
 
@@ -35,20 +36,24 @@ type GameInvite struct {
 
 // GameRound is the collection of player turns that occurs at the same time
 type GameRound struct {
-	ID        string `json:"id"`
-	SessionID string `json:"sessionId"`
+	ID      string       `json:"id"`
+	Session *GameSession `json:"session"`
+	Turns   []*Turn      `json:"turns"`
 }
 
 // GameSession represents the session users can join to play the game together
 type GameSession struct {
-	ID    string  `json:"id"`
-	Users []*User `json:"users"`
+	ID           string       `json:"id"`
+	Users        []*User      `json:"users"`
+	Rounds       []*GameRound `json:"rounds"`
+	CurrentRound *GameRound   `json:"currentRound"`
 }
 
 // Generation represents the pokemon generational period.
 type Generation struct {
-	ID          string `json:"id"`
-	DisplayName string `json:"displayName"`
+	ID          string     `json:"id"`
+	DisplayName string     `json:"displayName"`
+	Pokemons    []*Pokemon `json:"pokemons"`
 }
 
 // JoinGameInput represents the input to the joinGame mutation
@@ -80,10 +85,10 @@ type NewTurn struct {
 
 // Pokemon represents the pokedex information for a pokemon.
 type Pokemon struct {
-	ID         string `json:"id"`
-	Name       string `json:"name"`
-	Image      string `json:"image"`
-	Generation int    `json:"generation"`
+	ID         string      `json:"id"`
+	Name       string      `json:"name"`
+	Image      string      `json:"image"`
+	Generation *Generation `json:"generation"`
 }
 
 // StartTurnInput represents the input to the startTurn mutation
@@ -98,12 +103,10 @@ type StartTurnPayload struct {
 
 // A Turn represents the gameplay for a user within a round
 type Turn struct {
-	ID        string   `json:"id"`
-	UserID    string   `json:"userId"`
-	Pokemon   *Pokemon `json:"pokemon"`
-	Drawing   *Drawing `json:"drawing"`
-	RoundID   string   `json:"roundId"`
-	SessionID string   `json:"sessionId"`
+	ID      string   `json:"id"`
+	User    *User    `json:"user"`
+	Pokemon *Pokemon `json:"pokemon"`
+	Drawing *Drawing `json:"drawing"`
 }
 
 // User represents a player in the game
