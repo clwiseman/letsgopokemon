@@ -1,12 +1,14 @@
 package main
 
 import (
+	"context"
 	"log"
 	"net/http"
 	"os"
 
 	"github.com/99designs/gqlgen/graphql/handler"
 	"github.com/99designs/gqlgen/graphql/playground"
+
 	resolver "github.com/clwiseman/letsgopokemon/internal"
 	"github.com/clwiseman/letsgopokemon/internal/generated"
 )
@@ -14,12 +16,23 @@ import (
 const defaultPort = "8080"
 
 func main() {
+	ctx := context.Background()
+
 	port := os.Getenv("PORT")
 	if port == "" {
 		port = defaultPort
 	}
 
-	srv := handler.NewDefaultServer(generated.NewExecutableSchema(generated.Config{Resolvers: &resolver.Resolver{}}))
+	postgresURL := os.Getenv("DATABASE_URL")
+
+	r, err := resolver.NewResolver(ctx, postgresURL)
+	if err != nil {
+		panic(err)
+	}
+
+	srv := handler.NewDefaultServer(generated.NewExecutableSchema(generated.Config{
+		Resolvers: r,
+	}))
 
 	http.Handle("/", playground.Handler("GraphQL playground", "/query"))
 	http.Handle("/query", srv)

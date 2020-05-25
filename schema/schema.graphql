@@ -4,8 +4,12 @@ Generation represents the pokemon generational period.
 type Generation {
   # The unique id for generation, equivalent to its generation number
   id: ID!
+
   # The display name for the generation number
   displayName: String!
+
+  # The pokemon belonging to this generation
+  pokemons: [Pokemon!]
 }
 
 """
@@ -14,12 +18,15 @@ Pokemon represents the pokedex information for a pokemon.
 type Pokemon {
   # The unique id of the pokemon, equivalent to its pokedex number
   id: ID!
+
   # The name of the pokemon
   name: String!
+
   # A url of the pokemon's image
   image: String!
+
   # The generation the pokemon was created in
-  generation: Int!
+  generation: Generation!
 }
 
 type Query {
@@ -34,12 +41,18 @@ type Query {
   pokemon(input: ID!): Pokemon
 }
 
+type Subscription {
+  # A subscription to fetch the active game session for a given user using the user `id`.
+  session(userID: ID!): GameSession!
+}
+
 """
 User represents a player in the game
 """
 type User {
   # The unique id of a user
   id: ID!
+
   # The display name for the user profile
   name: String!
 }
@@ -50,8 +63,15 @@ GameSession represents the session users can join to play the game together
 type GameSession {
   # The unique id of a session
   id: ID!
+
   # An array of users in the session
   users: [User!]
+
+  # An array of the rounds inside the game session, in chronological order.
+  rounds: [GameRound!]
+
+  # A quick reference to the current round happening in the game session. Is null if no round is active.
+  currentRound: GameRound
 }
 
 """
@@ -83,6 +103,7 @@ GameInvite represents the information needed to add a new player to a session
 input GameInvite {
   # The id of the session to join
   sessionId: ID!
+
   # The display name for the user
   userName: String!
 }
@@ -109,8 +130,12 @@ GameRound is the collection of player turns that occurs at the same time
 type GameRound {
   # A unique id for a round within a turn of a game session
   id: ID!
-  # The id of the current game session 
-  sessionId: ID!
+
+  # The current game session
+  session: GameSession!
+
+  # The array of all the turns currently going on in this session
+  turns: [Turn]
 }
 
 """
@@ -127,16 +152,15 @@ A Turn represents the gameplay for a user within a round
 type Turn {
   # The unique id of the turn
   id: ID!
-  # The id of the user who's turn it is
-  userId: ID!
+
+  # The user who's turn it is
+  user: User!
+
   # The pokemon being drawn
   pokemon: Pokemon!
+
   # The drawing captured from the canvas after a turn is ended
   drawing: Drawing
-  # The round the turn occurs within
-  roundId: ID!
-  # The session the turn occurs within
-  sessionId: ID!
 }
 
 """
@@ -145,8 +169,10 @@ StartTurnInput represents the information needed to start a turn
 input NewTurn {
   # The id of the user who's turn it is
   userId: ID!
+
   # The id of the round the turn occurs within
   roundId: ID!
+
   # The id of the session the turn occurs within
   sessionId: ID!
 }
@@ -178,6 +204,9 @@ input NewDrawing {
 EndTurnInput represents the input to the endTurn mutation
 """
 input EndTurnInput {
+  # The unique id of the turn
+  id: ID!
+
   # The drawing captured from the canvas after a turn is ended
   newDrawing: NewDrawing!
 }
