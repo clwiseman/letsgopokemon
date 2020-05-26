@@ -560,18 +560,19 @@ type GameSession {
 }
 
 """
-NewGameSession represents a new session created by a user
+NewUser represents a new user to be created
 """
-input NewGameSession {
-  userId: ID!
+input NewUser {
+  # A new user's inputted display name
+  displayName: String!
 }
 
 """
 CreateGameInput represents the input to the createGame mutation
 """
 input CreateGameInput {
-  # A new session created by a user
-  newGameSession: NewGameSession!
+  # A new user
+  newUser: NewUser!
 }
 
 """
@@ -3113,9 +3114,9 @@ func (ec *executionContext) unmarshalInputCreateGameInput(ctx context.Context, o
 
 	for k, v := range asMap {
 		switch k {
-		case "newGameSession":
+		case "newUser":
 			var err error
-			it.NewGameSession, err = ec.unmarshalNNewGameSession2ᚖgithubᚗcomᚋclwisemanᚋletsgopokemonᚋinternalᚋmodelsᚐNewGameSession(ctx, v)
+			it.NewUser, err = ec.unmarshalNNewUser2ᚖgithubᚗcomᚋclwisemanᚋletsgopokemonᚋinternalᚋmodelsᚐNewUser(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -3209,24 +3210,6 @@ func (ec *executionContext) unmarshalInputNewDrawing(ctx context.Context, obj in
 	return it, nil
 }
 
-func (ec *executionContext) unmarshalInputNewGameSession(ctx context.Context, obj interface{}) (models.NewGameSession, error) {
-	var it models.NewGameSession
-	var asMap = obj.(map[string]interface{})
-
-	for k, v := range asMap {
-		switch k {
-		case "userId":
-			var err error
-			it.UserID, err = ec.unmarshalNID2string(ctx, v)
-			if err != nil {
-				return it, err
-			}
-		}
-	}
-
-	return it, nil
-}
-
 func (ec *executionContext) unmarshalInputNewTurn(ctx context.Context, obj interface{}) (models.NewTurn, error) {
 	var it models.NewTurn
 	var asMap = obj.(map[string]interface{})
@@ -3248,6 +3231,24 @@ func (ec *executionContext) unmarshalInputNewTurn(ctx context.Context, obj inter
 		case "sessionId":
 			var err error
 			it.SessionID, err = ec.unmarshalNID2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		}
+	}
+
+	return it, nil
+}
+
+func (ec *executionContext) unmarshalInputNewUser(ctx context.Context, obj interface{}) (models.NewUser, error) {
+	var it models.NewUser
+	var asMap = obj.(map[string]interface{})
+
+	for k, v := range asMap {
+		switch k {
+		case "displayName":
+			var err error
+			it.DisplayName, err = ec.unmarshalNString2string(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -4143,18 +4144,6 @@ func (ec *executionContext) unmarshalNNewDrawing2ᚖgithubᚗcomᚋclwisemanᚋl
 	return &res, err
 }
 
-func (ec *executionContext) unmarshalNNewGameSession2githubᚗcomᚋclwisemanᚋletsgopokemonᚋinternalᚋmodelsᚐNewGameSession(ctx context.Context, v interface{}) (models.NewGameSession, error) {
-	return ec.unmarshalInputNewGameSession(ctx, v)
-}
-
-func (ec *executionContext) unmarshalNNewGameSession2ᚖgithubᚗcomᚋclwisemanᚋletsgopokemonᚋinternalᚋmodelsᚐNewGameSession(ctx context.Context, v interface{}) (*models.NewGameSession, error) {
-	if v == nil {
-		return nil, nil
-	}
-	res, err := ec.unmarshalNNewGameSession2githubᚗcomᚋclwisemanᚋletsgopokemonᚋinternalᚋmodelsᚐNewGameSession(ctx, v)
-	return &res, err
-}
-
 func (ec *executionContext) unmarshalNNewTurn2githubᚗcomᚋclwisemanᚋletsgopokemonᚋinternalᚋmodelsᚐNewTurn(ctx context.Context, v interface{}) (models.NewTurn, error) {
 	return ec.unmarshalInputNewTurn(ctx, v)
 }
@@ -4164,6 +4153,18 @@ func (ec *executionContext) unmarshalNNewTurn2ᚖgithubᚗcomᚋclwisemanᚋlets
 		return nil, nil
 	}
 	res, err := ec.unmarshalNNewTurn2githubᚗcomᚋclwisemanᚋletsgopokemonᚋinternalᚋmodelsᚐNewTurn(ctx, v)
+	return &res, err
+}
+
+func (ec *executionContext) unmarshalNNewUser2githubᚗcomᚋclwisemanᚋletsgopokemonᚋinternalᚋmodelsᚐNewUser(ctx context.Context, v interface{}) (models.NewUser, error) {
+	return ec.unmarshalInputNewUser(ctx, v)
+}
+
+func (ec *executionContext) unmarshalNNewUser2ᚖgithubᚗcomᚋclwisemanᚋletsgopokemonᚋinternalᚋmodelsᚐNewUser(ctx context.Context, v interface{}) (*models.NewUser, error) {
+	if v == nil {
+		return nil, nil
+	}
+	res, err := ec.unmarshalNNewUser2githubᚗcomᚋclwisemanᚋletsgopokemonᚋinternalᚋmodelsᚐNewUser(ctx, v)
 	return &res, err
 }
 

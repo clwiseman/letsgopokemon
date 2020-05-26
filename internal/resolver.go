@@ -26,25 +26,31 @@ type Room struct {
 }
 
 type Resolver struct {
-	pokedx *pokedex.Pokedex
+	pokedex *pokedex.Pokedex
 
 	Rooms map[string]*Room
 	mu    sync.Mutex // nolint: structcheck
 }
 
 func NewResolver(ctx context.Context, pokedexURL string) (*Resolver, error) {
-	pokedx, err := pokedex.NewPokedex(ctx, pokedexURL)
+	pokedex, err := pokedex.NewPokedex(ctx, pokedexURL)
 	if err != nil {
 		return nil, err
 	}
 
 	return &Resolver{
-		pokedx: pokedx,
+		pokedex: pokedex,
 	}, nil
 }
 
 func (r *mutationResolver) CreateGame(ctx context.Context, input models.CreateGameInput) (*models.CreateGamePayload, error) {
-	panic("not implemented")
+	result, err := r.pokedex.CreateGame(ctx, input.NewUser.DisplayName)
+	if err != nil {
+		return nil, err
+	}
+	return &models.CreateGamePayload{
+		GameSession: converters.ConvertSession(result),
+	}, nil
 }
 
 func (r *mutationResolver) JoinGame(ctx context.Context, input models.JoinGameInput) (*models.JoinGamePayload, error) {
@@ -60,7 +66,7 @@ func (r *mutationResolver) EndTurn(ctx context.Context, input models.EndTurnInpu
 }
 
 func (r *queryResolver) Generations(ctx context.Context) ([]*models.Generation, error) {
-	result, err := r.pokedx.ListGenerations(ctx)
+	result, err := r.pokedex.ListGenerations(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -75,7 +81,7 @@ func (r *queryResolver) Pokemon(ctx context.Context, input string) (*models.Poke
 		return nil, fmt.Errorf("invalid ID provided")
 	}
 
-	result, err := r.pokedx.GetPokemonByID(ctx, int64(id))
+	result, err := r.pokedex.GetPokemonByID(ctx, int64(id))
 	if err != nil {
 		return nil, err
 	}
@@ -90,7 +96,7 @@ func (r *subscriptionResolver) Session(ctx context.Context, userID string) (<-ch
 		return nil, fmt.Errorf("invalid User ID provided")
 	}
 
-	result, err := r.pokedx.GetSession(ctx, int64(id))
+	result, err := r.pokedex.GetSession(ctx, int64(id))
 	if err != nil {
 		return nil, err
 	}

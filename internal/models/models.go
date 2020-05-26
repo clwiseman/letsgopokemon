@@ -4,7 +4,7 @@ package models
 
 // CreateGameInput represents the input to the createGame mutation
 type CreateGameInput struct {
-	NewGameSession *NewGameSession `json:"newGameSession"`
+	NewUser *NewUser `json:"newUser"`
 }
 
 // CreateGamePayload represents the output to the createGame mutation
@@ -71,16 +71,16 @@ type NewDrawing struct {
 	Drawing string `json:"drawing"`
 }
 
-// NewGameSession represents a new session created by a user
-type NewGameSession struct {
-	UserID string `json:"userId"`
-}
-
 // StartTurnInput represents the information needed to start a turn
 type NewTurn struct {
 	UserID    string `json:"userId"`
 	RoundID   string `json:"roundId"`
 	SessionID string `json:"sessionId"`
+}
+
+// NewUser represents a new user to be created
+type NewUser struct {
+	DisplayName string `json:"displayName"`
 }
 
 // Pokemon represents the pokedex information for a pokemon.
