@@ -658,9 +658,6 @@ input NewTurn {
 
   # The id of the round the turn occurs within
   roundId: ID!
-
-  # The id of the session the turn occurs within
-  sessionId: ID!
 }
 
 """
@@ -691,7 +688,7 @@ EndTurnInput represents the input to the endTurn mutation
 """
 input EndTurnInput {
   # The unique id of the turn
-  id: ID!
+  turnId: ID!
 
   # The drawing captured from the canvas after a turn is ended
   newDrawing: NewDrawing!
@@ -3132,9 +3129,9 @@ func (ec *executionContext) unmarshalInputEndTurnInput(ctx context.Context, obj 
 
 	for k, v := range asMap {
 		switch k {
-		case "id":
+		case "turnId":
 			var err error
-			it.ID, err = ec.unmarshalNID2string(ctx, v)
+			it.TurnID, err = ec.unmarshalNID2string(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -3225,12 +3222,6 @@ func (ec *executionContext) unmarshalInputNewTurn(ctx context.Context, obj inter
 		case "roundId":
 			var err error
 			it.RoundID, err = ec.unmarshalNID2string(ctx, v)
-			if err != nil {
-				return it, err
-			}
-		case "sessionId":
-			var err error
-			it.SessionID, err = ec.unmarshalNID2string(ctx, v)
 			if err != nil {
 				return it, err
 			}

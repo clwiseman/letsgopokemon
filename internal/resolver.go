@@ -44,7 +44,7 @@ func NewResolver(ctx context.Context, pokedexURL string) (*Resolver, error) {
 }
 
 func (r *mutationResolver) CreateGame(ctx context.Context, input models.CreateGameInput) (*models.CreateGamePayload, error) {
-	result, err := r.pokedex.CreateGame(ctx, input.NewUser.DisplayName)
+	result, err := r.pokedex.CreateGameSessionForUser(ctx, input.NewUser.DisplayName)
 	if err != nil {
 		return nil, err
 	}
@@ -54,15 +54,60 @@ func (r *mutationResolver) CreateGame(ctx context.Context, input models.CreateGa
 }
 
 func (r *mutationResolver) JoinGame(ctx context.Context, input models.JoinGameInput) (*models.JoinGamePayload, error) {
-	panic("not implemented")
+	sessionID, err := strconv.Atoi(input.Invite.SessionID)
+	if err != nil {
+		logrus.WithContext(ctx).WithError(err).Error("could not convert inputted session id")
+		return nil, fmt.Errorf("invalid session ID provided")
+	}
+
+	result, err := r.pokedex.JoinGameWithInvite(ctx, input.Invite.UserName, int64(sessionID))
+	if err != nil {
+		return nil, err
+	}
+
+	return &models.JoinGamePayload{
+		Session: converters.ConvertSession(result),
+	}, nil
 }
 
 func (r *mutationResolver) StartTurn(ctx context.Context, input models.StartTurnInput) (*models.StartTurnPayload, error) {
-	panic("not implemented")
+	userID, err := strconv.Atoi(input.NewTurn.UserID)
+	if err != nil {
+		logrus.WithContext(ctx).WithError(err).Error("could not convert inputted user id")
+		return nil, fmt.Errorf("invalid user ID provided")
+	}
+
+	roundID, err := strconv.Atoi(input.NewTurn.RoundID)
+	if err != nil {
+		logrus.WithContext(ctx).WithError(err).Error("could not convert inputted round id")
+		return nil, fmt.Errorf("invalid round ID provided")
+	}
+
+	result, err := r.pokedex.StartTurnForUser(ctx, int64(userID), int64(roundID))
+	if err != nil {
+		return nil, err
+	}
+
+	return &models.StartTurnPayload{
+		Turn: converters.ConvertTurn(result),
+	}, nil
 }
 
 func (r *mutationResolver) EndTurn(ctx context.Context, input models.EndTurnInput) (*models.EndTurnPayload, error) {
-	panic("not implemented")
+	turnID, err := strconv.Atoi(input.TurnID)
+	if err != nil {
+		logrus.WithContext(ctx).WithError(err).Error("could not convert inputted turn id")
+		return nil, fmt.Errorf("invalid turn ID provided")
+	}
+
+	result, err := r.pokedex.EndTurnForUser(ctx, int64(turnID), input.NewDrawing.Drawing)
+	if err != nil {
+		return nil, err
+	}
+
+	return &models.EndTurnPayload{
+		Turn: converters.ConvertTurn(result),
+	}, nil
 }
 
 func (r *queryResolver) Generations(ctx context.Context) ([]*models.Generation, error) {

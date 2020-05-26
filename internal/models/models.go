@@ -19,7 +19,7 @@ type Drawing struct {
 
 // EndTurnInput represents the input to the endTurn mutation
 type EndTurnInput struct {
-	ID         string      `json:"id"`
+	TurnID     string      `json:"turnId"`
 	NewDrawing *NewDrawing `json:"newDrawing"`
 }
 
@@ -73,9 +73,8 @@ type NewDrawing struct {
 
 // StartTurnInput represents the information needed to start a turn
 type NewTurn struct {
-	UserID    string `json:"userId"`
-	RoundID   string `json:"roundId"`
-	SessionID string `json:"sessionId"`
+	UserID  string `json:"userId"`
+	RoundID string `json:"roundId"`
 }
 
 // NewUser represents a new user to be created
