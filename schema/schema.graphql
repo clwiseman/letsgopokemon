@@ -75,18 +75,19 @@ type GameSession {
 }
 
 """
-NewGameSession represents a new session created by a user
+NewUser represents a new user to be created
 """
-input NewGameSession {
-  userId: ID!
+input NewUser {
+  # A new user's inputted display name
+  displayName: String!
 }
 
 """
 CreateGameInput represents the input to the createGame mutation
 """
 input CreateGameInput {
-  # A new session created by a user
-  newGameSession: NewGameSession!
+  # A new user
+  newUser: NewUser!
 }
 
 """

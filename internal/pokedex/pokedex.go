@@ -77,6 +77,7 @@ func (pd Pokedex) ListGenerations(ctx context.Context) ([]db_models.Generation, 
 	return generations, nil
 }
 
+// GetSession gets the session for the current game.
 func (pd Pokedex) GetSession(ctx context.Context, userId int64) (db_models.Session, error) {
 	session := db_models.Session{}
 
@@ -88,6 +89,31 @@ func (pd Pokedex) GetSession(ctx context.Context, userId int64) (db_models.Sessi
 	if err != nil {
 		logrus.WithContext(ctx).WithError(err).Error("Could not query game session")
 		return db_models.Session{}, errors.Wrap(err, "could not query game session")
+	}
+
+	return session, nil
+}
+
+// CreateGame creates a new user and a new game session.
+func (pd Pokedex) CreateGame(ctx context.Context, name string) (db_models.Session, error) {
+	user := db_models.User{
+		Name: name,
+	}
+
+	err := pd.db.WithContext(ctx).Insert(&user)
+	if err != nil {
+		logrus.WithContext(ctx).WithError(err).Error("Could not create a new user")
+		return db_models.Session{}, errors.Wrap(err, "could not create a new user")
+	}
+
+	session := db_models.Session{
+		Users: []*db_models.User{&user},
+	}
+
+	err = pd.db.WithContext(ctx).Insert(&session)
+	if err != nil {
+		logrus.WithContext(ctx).WithError(err).Error("Could not create a new session")
+		return db_models.Session{}, errors.Wrap(err, "could not create a new session")
 	}
 
 	return session, nil
