@@ -2,7 +2,14 @@
 
 # start local dev
 
-To start, run `docker-compose up -d` in the terminal to create the database
+In the terminal:
+
+- Start the docker container `docker-compose up -d`
+
+If you are working for the first time or have removed your docker volumes
+
+- Create the database `docker exec -it letsgopokemon_pg_1`, `psql -U letsgo`,
+  `CREATE DATABASE letsgopokemon`, `\q`, `exit`
 
 # generate graphql based on schema
 

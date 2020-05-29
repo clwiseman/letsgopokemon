@@ -6,7 +6,7 @@ import (
 
 const (
 	generationsSQL = `
-INSERT INTO generation (id, display_name) VALUES 
+INSERT INTO generations (id, name) VALUES 
 (1, 'Gen I'),
 (2, 'Gen II'),
 (3, 'Gen III'),
@@ -16,7 +16,7 @@ INSERT INTO generation (id, display_name) VALUES
 (7, 'Gen VII');`
 
 	pokemonSQL = `
-INSERT INTO pokemon (id, name) VALUES 
+INSERT INTO pokemons (id, name) VALUES 
 (1, 'Bulbasaur'),
 (2, 'Ivysaur'),
 (3, 'Venusaur'),
@@ -828,7 +828,7 @@ INSERT INTO pokemon (id, name) VALUES
 (809, 'Melmetal');`
 
 	linkPokemonToGenerationsSQL = `
-UPDATE pokemon SET generation =
+UPDATE pokemons SET generation =
     (CASE
         WHEN id <= 151 THEN 1
         WHEN id >= 152 AND id <= 251 THEN 2

@@ -31,7 +31,7 @@ func (m *BaseModel) BeforeInsert(ctx context.Context) (context.Context, error) {
 
 var _ pg.BeforeUpdateHook = (*BaseModel)(nil)
 
-// BeforeInsert is a hook that will set the times when an element is about to get updated.
+// BeforeUpdate is a hook that will set the times when an element is about to get updated.
 func (m *BaseModel) BeforeUpdate(ctx context.Context) (context.Context, error) {
 	m.UpdatedAt = time.Now()
 	return ctx, nil
@@ -78,7 +78,7 @@ type Round struct {
 	Turns   []*Turn
 }
 
-// Turn is a turn within a round. Each players takes on turn drawing their pokemons.
+// Turn is a turn within a round. Each players takes on turn drawing their pokemon.
 type Turn struct {
 	BaseModel
 
