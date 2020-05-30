@@ -8,8 +8,12 @@ In the terminal:
 
 If you are working for the first time or have removed your docker volumes
 
-- Create the database `docker exec -it letsgopokemon_pg_1`, `psql -U letsgo`,
+- Create the database `docker exec -it letsgopokemon_pg_1 bash`, `psql -U letsgo`,
   `CREATE DATABASE letsgopokemon`, `\q`, `exit`
+
+Source the env variables
+
+- `source ./env`
 
 # generate graphql based on schema
 
