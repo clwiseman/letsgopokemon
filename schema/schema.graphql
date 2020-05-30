@@ -173,9 +173,6 @@ input NewTurn {
 
   # The id of the round the turn occurs within
   roundId: ID!
-
-  # The id of the session the turn occurs within
-  sessionId: ID!
 }
 
 """
@@ -206,7 +203,7 @@ EndTurnInput represents the input to the endTurn mutation
 """
 input EndTurnInput {
   # The unique id of the turn
-  id: ID!
+  turnId: ID!
 
   # The drawing captured from the canvas after a turn is ended
   newDrawing: NewDrawing!

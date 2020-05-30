@@ -87,15 +87,15 @@ func (pd Pokedex) GetSession(ctx context.Context, userId int64) (db_models.Sessi
 		Where("session.user_id = ?", userId).
 		Select()
 	if err != nil {
-		logrus.WithContext(ctx).WithError(err).Error("Could not query game session")
-		return db_models.Session{}, errors.Wrap(err, "could not query game session")
+		logrus.WithContext(ctx).WithError(err).Error("Could not query game session by user id")
+		return db_models.Session{}, errors.Wrap(err, "could not query game session by user id")
 	}
 
 	return session, nil
 }
 
-// CreateGame creates a new user and a new game session.
-func (pd Pokedex) CreateGame(ctx context.Context, name string) (db_models.Session, error) {
+// CreateGameSessionForUser creates a new user and a new game session.
+func (pd Pokedex) CreateGameSessionForUser(ctx context.Context, name string) (db_models.Session, error) {
 	user := db_models.User{
 		Name: name,
 	}
@@ -117,4 +117,96 @@ func (pd Pokedex) CreateGame(ctx context.Context, name string) (db_models.Sessio
 	}
 
 	return session, nil
+}
+
+// JoinGameWithInvite creates a new user and adds that user to a game session.
+func (pd Pokedex) JoinGameWithInvite(ctx context.Context, name string, sessionID int64) (db_models.Session, error) {
+	user := db_models.User{
+		Name: name,
+	}
+	err := pd.db.WithContext(ctx).Insert(&user)
+	if err != nil {
+		logrus.WithContext(ctx).WithError(err).Error("Could not create a new user")
+		return db_models.Session{}, errors.Wrap(err, "could not create a new user")
+	}
+
+	session := db_models.Session{}
+	err = pd.db.
+		WithContext(ctx).
+		Model(&session).
+		Where("session.id = ?", sessionID).
+		Select()
+	if err != nil {
+		logrus.WithContext(ctx).WithError(err).Error("Could not query game session by id")
+		return db_models.Session{}, errors.Wrap(err, "could not query game session by id")
+	}
+
+	users := append(session.Users, &user)
+	session.Users = users
+
+	return session, nil
+}
+
+// StartTurnForUser creates a new turn within a round.
+func (pd Pokedex) StartTurnForUser(ctx context.Context, userId int64, roundId int64) (db_models.Turn, error) {
+	// Get user info.
+	user := db_models.User{
+		BaseModel: db_models.BaseModel{
+			Id: userId,
+		},
+	}
+	err := pd.db.WithContext(ctx).Select(&user)
+	if err != nil {
+		logrus.WithContext(ctx).WithError(err).Error("Could not query user")
+		return db_models.Turn{}, errors.Wrap(err, "could not query user")
+	}
+
+	// Get round info.
+	round := db_models.Round{
+		BaseModel: db_models.BaseModel{
+			Id: roundId,
+		},
+	}
+	err = pd.db.WithContext(ctx).Select(&round)
+	if err != nil {
+		logrus.WithContext(ctx).WithError(err).Error("Could not query round")
+		return db_models.Turn{}, errors.Wrap(err, "could not query round")
+	}
+
+	// TODO Get a pokemon.
+	pokemon := db_models.Pokemon{}
+
+	// Create a turn.
+	turn := db_models.Turn{
+		User:    &user,
+		Round:   &round,
+		Pokemon: &pokemon,
+	}
+	err = pd.db.WithContext(ctx).Insert(&turn)
+	if err != nil {
+		logrus.WithContext(ctx).WithError(err).Error("Could not create a new turn")
+		return db_models.Turn{}, errors.Wrap(err, "could not create a new turn")
+	}
+
+	return turn, nil
+}
+
+// EndTurnForUser ends a turn within a round.
+func (pd Pokedex) EndTurnForUser(ctx context.Context, turnId int64, drawing string) (db_models.Turn, error) {
+	// Get turn info.
+	turn := db_models.Turn{
+		BaseModel: db_models.BaseModel{
+			Id: turnId,
+		},
+	}
+	err := pd.db.WithContext(ctx).Select(&turn)
+	if err != nil {
+		logrus.WithContext(ctx).WithError(err).Error("Could not query turn")
+		return db_models.Turn{}, errors.Wrap(err, "could not query turn")
+	}
+
+	// Add drawing to turn.
+	turn.Drawing = drawing
+
+	return turn, nil
 }
